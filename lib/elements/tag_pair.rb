@@ -1,6 +1,6 @@
 # Non-Self-Closing tag. Can have children, but doesn't have to.
-class ParentTag < Tag
-  attr_reader :children
+class TagPair < Tag
+  attr_accessor :children
   # children are an array of anything which answers to_s. They will be
   # inserted sequentially in between the opening and closing tags.
 
