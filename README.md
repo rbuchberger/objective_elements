@@ -83,8 +83,10 @@ tries not to be too particular about how you use it.
 ## Usage
 
 So we're on the same page, here's the terminology I'm using:
+```
 <p class="stumpy">Hello</p>
 |a|       b      |  c  | d |
+```
 - a: type
 - b: attributes
 - c: child
@@ -100,7 +102,7 @@ self-closing tag, meaning it has no children and no closing tag. A `TagPair` is 
  - attributes:
      **Hash** {symbol: array || string}, optional. Example: `{class: 'myclass plaid'}` 
  - newline: 
-     boolean. Whether to include a line break after the closing tag. Defaults to true.
+     **Boolean**. Whether to include a line break after the closing tag. Defaults to true.
 
 ### Tag Methods (that you care about)
 
