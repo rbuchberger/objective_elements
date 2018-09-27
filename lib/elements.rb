@@ -1,117 +1,110 @@
 # require 'elements/version'
 
+# Collection of HTML element tags
 module Elements
-  # Collection of HTML element tags
-  class Element
-    # Root Class, any basic HTML tag
+  # Describes a basic, self-closing HTML tag.
+  class Tag
+    attr_reader :type, :attributes
+    attr_accessor :newline
 
-    # attributes are a hash, with symbols as keys. The keys and values will be
-    # rendered to key="value"
+    # type is a string, such as 'div' or 'p'.
 
-    # children are an array of either strings or Elements. They will be inserted
-    # sequentially in between the opening and closing tags.
+    # attributes are a hash, with symobls as keys and an array of values. Will
+    # render out to key="value1 value2 value3"
 
-    # self_closing? determines whether or not to include a closing tag. If true,
-    # there cannot be any children.
-
-    # newline? determines whether or not to insert a line break after the
+    # newline determines whether or not to insert a line break after the
     # element.
 
-    attr_reader :type, :children, :attributes, :self_closing, :newline
-    alias self_closing? self_closing
-    alias newline? newline
-
-    def initialize(
-      type,
-      attributes: {},
-      children: [],
-      self_closing: false,
-      newline: true
-    )
-
+    def initialize(type, attributes: {}, newline: true)
       @type = type
-      @attributes = attributes
-      @children = children
-      @self_closing = self_closing
+      reset_attributes
+      add_attributes attributes
       @newline = newline
-      validate
     end
 
-    def validate
-      # attributes must be a hash of symbols
-      raise 'attributes must be a hash' unless @attributes.is_a? Hash
-
-      @attributes.transform_keys!(&:to_sym)
-
-      # children must be an array
-      raise 'children must be an array' unless @children.is_a? Array
-
-      # If self closing, cannot have any children.
-      if @self_closing && @children.any?
-        raise 'Cannot be self closing and have children'
-      end
-
-      self
+    def reset_attributes
+      @attributes = {}
+      @attributes.default = []
     end
 
-    def children=(children)
-      @children = children
-      validate
-    end
-
-    def add_child(addition)
-      @children << addition
-      validate
-    end
-
-    def attributes=(attributes)
-      @attributes = attributes
-      validate
-    end
-
-    def self_closing=(boolean)
-      @self_closing = boolean
-      validate
-      @self_closing
-    end
-
-    def self_close!
-      @children = []
-      @self_closing = true
-    end
-
-    def stringify_attributes
+    def render_attributes
       # Turns attributes into a string we can inject
       attribute_string = ''
       @attributes.each_pair do |k, v|
-        attribute_string += "#{k.to_s}=\"#{v}\" "
+        attribute_string << "#{k}=\"#{v.join ' '}\" "
       end
-      attribute_string.strip!
     end
 
-    def stringify_children
-      output = ''
-      @children.each do |c|
-        output << if c.is_a? Element
-                    c.render
-                  else
-                    c.to_s
-                  end
-      end
-      output
-    end
-
-    def render
+    def to_s
+      # Renders our HTML.
       output =  '<' + @type
-      output << ' ' + stringify_attributes unless @attributes.empty?
+      output << ' ' + render_attributes unless @attributes.empty?
       output << '>'
-      output << stringify_children if @children
-      output << "</#{@type}>" unless self_closing?
-      output << "\n" if newline?
+      output << yield if block_given?
+      output << "\n" if newline
+    end
+
+    def write_attributes(new)
+      # Accepts a hash, overwrites existing attribues.
+      reset_attributes
+      add_attributes(new)
+    end
+
+    def add_attributes(new)
+      # Appends values to existing attributes
+      new.each_pair do |k, v|
+        @attributes[k.to_sym].concat v.split ' '
+      end
+      self
     end
 
     def add_parent(parent)
       parent.add_child(self)
+    end
+  end
+
+  # Non-Self-Closing tag. Can have children, but doesn't have to.
+  class ParentTag < Tag
+    attr_reader :children
+    # children are an array of anything which answers to_s. They will be
+    # inserted sequentially in between the opening and closing tags.
+
+    def initialize(type, attributes: {}, newline: true, children: nil)
+      reset_children
+      add_children(children)
+      super(type, attributes: attributes, newline: newline)
+    end
+
+    def reset_children
+      @children = []
+    end
+
+    def add_children(addition)
+      @children << addition
+      @children.flatten!.compact!
+      raise 'At least one invalid child' unless @children.all?.respond_to? :to_s
+
+      self
+    end
+
+    def stringify_children
+      if children.any?
+        content = children.inject { |output, child| output << child.to_s }
+        if (content.length > 80) || (content.include? "\n")
+          self.newline = true
+          "\n\ \ " + content + "\n"
+        end
+        content
+      else
+        ''
+      end
+    end
+
+    def to_s
+      super do
+        output = stringify_children
+        output << "</#{type}>"
+      end
     end
   end
 end
