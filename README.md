@@ -74,11 +74,12 @@ puts div.to_s
 
 ```
 It doesn't do much to validate your HTML. Put garbage in and you'll get garbage out. That said, it
-tries not to be too particular about how you use it.
+tries not to be too particular about how you use it. Arguments are pretty flexible about types, you
+can build things in pretty much any order or direction, and so on.
 
 ## Installation
 
- - coming eventually.
+ - coming eventually. It'll be a gem and a require.
  
 ## Usage
 
@@ -100,31 +101,32 @@ self-closing tag, meaning it has no children and no closing tag. A `TagPair` is 
  - type:
      **String**, mandatory. What kind of tag it is; such as 'img' or 'hr'
  - attributes:
-     **Hash** {symbol: array || string}, optional. Example: `{class: 'myclass plaid'}` 
+     **Hash** `{symbol: array || string}`, optional. Example: `{class: 'myclass plaid'}` 
  - newline: 
      **Boolean**. Whether to include a line break after the closing tag. Defaults to true.
 
 ### Tag Methods (that you care about)
 
-.new(type, attributes: {}, newline: true)
+`Tag.new(type, attributes: {}, newline: true)`
+- Make a new tag.
 
-.to_s
-- The big one. Returns your HTML as a string.
+`.to_s`
+- The big one. Returns your HTML as a string, nondestructively.
 
-.write_attributes(hash)
-- Deletes and overwrites the attributes.
+`.write_attributes(hash)`
+- Deletes and overwrites the attributes. Destructive.
 
-.add_attributes(hash)
-- Appends them instead of overwriting
+`.add_attributes(hash)`
+- Appends them instead of overwriting. Destructive.
 
-.type - returns the tag type
+`.type` - returns the tag type
 
-.add_parent(TagPair)
-returns supplied TagPair, with self added as a child.
+`.add_parent(TagPair)`
+returns supplied TagPair, with self added as a child. Nondestructive.
 
-attr_readers: .attributes and .type
+`attr_reader: .attributes and .type`
 
-attr_accessor: .newline
+`attr_accessor: .newline`
 
 ### TagPair Properties:
 
@@ -136,15 +138,15 @@ attr_accessor: .newline
 
 ### TagPair Methods (that you care about)
 
-.new(type, attributes: {}, newline: true, children: [])
+`TagPair.new(type, attributes: {}, newline: true, children: [] || string || anything that knows.to_s)`
  - You can initialize it with kids. 
 
-.add_children(array, or anything that knows .to_s)
+`add_children(array, string, or anything that knows .to_s)`
 
-attr_accessor: children
+`attr_accessor: children`
 - You can modify the children array directly if you like.
 
-.to_s
+`.to_s`
 - Just like `Tag`. It splits opening and closing tags to their own lines if the stringified children
     are longer than 80 characters, or if it includes a line break somewhere. Indentation is
     hardcoded at two spaces. If you want that to be configurable, pull requests are welcome. 
