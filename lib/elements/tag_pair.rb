@@ -1,44 +1,44 @@
-# Non-Self-Closing tag. Can have children, but doesn't have to.
+# Non-Self-Closing tag. Can have content, but doesn't have to.
 class TagPair < Tag
-  attr_accessor :children
-  # children are an array of anything which answers to_s. They will be
-  # inserted sequentially in between the opening and closing tags.
+  attr_accessor :content
+  # content is an array of anything. Entries will be inserted sequentially in
+  # between the opening and closing tags.
 
-  def initialize(type, attributes: {}, newline: true, children: [])
-    reset_children
-    add_children(children)
-    super(type, attributes: attributes, newline: newline)
+  def initialize(element, attributes: nil, newline: true, content: [])
+    reset_content(content)
+    super(element, attributes: attributes, newline: newline)
   end
 
-  def reset_children
-    @children = []
+  # Replaces existing content with supplied argument.
+  def reset_content(new)
+    @content = []
+    add_content(new)
   end
 
-  def add_children(addition)
-    @children << addition
-    @children.flatten!
-    raise 'At least one invalid child' unless @children.all?.respond_to? :to_s
-
+  def add_content(addition)
+    @content << addition
+    @content.flatten!
     self
   end
 
-  def stringify_children
-    if children.any?
-      content = children.inject { |output, child| output << child.to_s }
-      if (content.length > 80) || (content.include? "\n")
-        self.newline = true
-        "\n\ \ " + content + "\n"
-      end
-      content
+  def multiline
+    content.any? { |c| c.to_s.include? "\n" } || content.join('').length > 60
+  end
+
+  def newline
+    super || multiline
+  end
+
+  def stringify_content
+    if multiline
+      # TODO: Fix this. Currently doesn't handle inline elements well.
+      ("\n  " + content.join("\n  ") + "\n")
     else
-      ''
+      content.join
     end
   end
 
   def to_s
-    super do
-      output = stringify_children
-      output << "</#{type}>"
-    end
+    super { stringify_content + "</#{element}>" }
   end
 end
