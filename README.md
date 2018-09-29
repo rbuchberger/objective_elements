@@ -1,14 +1,13 @@
-**This gem is very young and untested. Use with caution.**
+**This gem is young and untested. Use with caution.**
 
 # Elements
 
-This is a tiny gem that lets you build nicely formatted HTML using sane, clean, readable Ruby. I use
-it for writing jekyll plugins, but you can use it anywhere. It's ~100 lines of plain Ruby; it has no
-dependencies.
+This is a tiny for building nicely formatted HTML using sane, readable Ruby. I use it for writing 
+jekyll plugins, but you can use it anywhere. It's ~100 lines, with no dependencies.
 
 Have you ever tried to build HTML with string concatenation and interpolation? At first it seems
-simple, but once you start accounting for all the what-ifs, the indentation, the closing tags, and
-the spaces you only need sometimes, it turns into a horrible mess.
+simple, but once you account for all the what-ifs, the indentation, the closing tags, and the 
+spaces you only need sometimes, it turns into a horrible mess.
 
 The problem, of course, is that building long, complex, varying blocks of text with string
 concatenation and interpolation is fragile, unreadable, and painful. You know this, but you're not
@@ -51,12 +50,12 @@ p.to_s
 
 p.add_attributes {class: 'slimy'}
 p.to_s
-# <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
+# <p class="stumpy grumpy slimy", id="the-ugly-one">
 # </p>
 
 p.add_content 'Bippity Boppity Boo!'
 p.to_s
-# <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
+# <p class="stumpy grumpy slimy", id="the-ugly-one">
 #   Bippity Boppity Boo!
 # </p>
 
@@ -95,11 +94,10 @@ div.to_s
 ```
 
 It does nothing it all to ensure that your HTML is valid, but whatever it gives you should be
-formatted correctly. It tries not to be particular about how you use it-- You can add or change
-anything right up until you call .to_s, and add_content tries to be flexible about the inputs you
-give it.
+formatted correctly. It tries not to be particular-- you can add or change anything right up 
+until you call .to_s, and add_content tries to be flexible about the inputs you give it.
 
-If you set 'oneline: true' on a parent TagPair and not all its children TagPairs, the output will not be
+If you set 'oneline: true' on a parent TagPair, but not all its children TagPairs, the output will not be
 pretty. I advise against it.
 
 ## Installation
