@@ -2,31 +2,27 @@
 # Describes a basic, self-closing HTML tag.
 class Tag
   attr_reader :attributes
-  attr_accessor :newline, :element
+  attr_accessor :element
 
   # element is a string, such as 'div' or 'p'.
 
-  # attributes are a hash. The keys are symbols, and the values are arrays. Will
-  # render as key="value1 value2 value3"
+  # Attributes are a hash. Keys are symbols, values are arrays. Will render as
+  # key="value1 value2 value3"
 
-  # newline determines whether or not to insert a line break after the
-  # element.
-
-  def initialize(element, attributes: nil, newline: true)
+  def initialize(element, attributes: nil)
     @element = element
     reset_attributes(attributes)
-    @newline = newline
   end
 
-  # Deletes current attributes, overwrites them with supplied hash.
+  # Deletes all current attributes, overwrites them with supplied hash.
   def reset_attributes(new = nil)
     @attributes = {}
     add_attributes(new) if new
   end
 
-  # The only way we add new attributes. Flexible about what you give it--
-  # accepts both strings and symbols for the keys, and both strings and arrays
-  # for the values.
+  # This is the only way we add new attributes. Flexible about what you give
+  # it-- accepts both strings and symbols for the keys, and both strings and
+  # arrays for the values.
   def add_attributes(new)
     formatted_new = {}
     new.each_pair do |k, v|
@@ -54,12 +50,18 @@ class Tag
     parent.add_content(self)
   end
 
-  # Renders our HTML.
-  def to_s
+  def opening_tag
     output =  '<' + @element
     output << ' ' + render_attributes unless @attributes.empty?
     output << '>'
-    output << yield if block_given?
-    output << "\n" if newline
+  end
+
+  def to_a
+    [opening_tag]
+  end
+
+  # Renders our HTML.
+  def to_s
+    opening_tag + "\n"
   end
 end
