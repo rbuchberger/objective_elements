@@ -2,7 +2,7 @@
 
 # Elements
 
-This is a teeny-tiny gem that builds nicely formatted HTML using sane, clean, readable Ruby. I use
+This is a tiny gem that lets you build nicely formatted HTML using sane, clean, readable Ruby. I use
 it for writing jekyll plugins, but you can use it anywhere. It's ~100 lines of plain Ruby; it has no
 dependencies.
 
@@ -40,42 +40,67 @@ That is why I wrote this gem. Here's a demo:
 
 ```ruby
 p = TagPair.new 'p'
-puts p.to_s
-# <p></p>
+p.to_s
+# <p>
+# </p>
 
-p.add_attributes {class: 'stumpy mopey grumpy', id: 'the-ugly-one'}
-puts p.to_s
-# <p class="stumpy mopey grumpy", id="the-ugly-one"></p>
+p.add_attributes {class: 'stumpy grumpy', id: 'the-ugly-one'}
+p.to_s
+# <p class="stumpy grumpy", id="the-ugly-one">
+# </p>
 
 p.add_attributes {class: 'slimy'}
-puts p.to_s
-# <p class="stumpy mopey grumpy slimy", id="the-ugly-one"></p>
+p.to_s
+# <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
+# </p>
 
 p.add_content 'Bippity Boppity Boo!'
-puts p.to_s
+p.to_s
+# <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
+#   Bippity Boppity Boo!
+# </p>
+
+p.oneline = true
+p.to_s
 # <p class="stumpy mopey grumpy slimy", id="the-ugly-one">Bippity Boppity Boo!</p>
 
+p.oneline = false
 p.add_content TagPair.new 'a', content: 'Link!', attributes: {href: 'awesome-possum.com'}
-puts p.to_s
-# <p class="stumpy mopey grumpy slimy", id="the-ugly-one">Bippity Boppity Boo!<a href="awesome-possum.com">Link!</a></p>
+p.content[1].oneline = true
+p.to_s
+# <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
+#   Bippity Boppity Boo!
+#   <a href="awesome-possum.com">Link!</a>
+# </p>
 
 div = p.add_parent TagPair.new 'div'
-puts div.to_s
+div.to_s
 # <div>
-#   <p class="stumpy mopey grumpy slimy", id="the-ugly-one">Bippity Boppity Boo!<a href="awesome-possum.com">Link!</a></p>
+#   <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
+#     Bippity Boppity Boo!
+#     <a href="awesome-possum.com">Link!</a>
+#   </p>
 # </div>
 
 div.add_content Tag.new 'img', attributes: {src: 'happy-puppy.jpg'}
-puts div.to_s
+div.to_s
 # <div>
-#   <p class="stumpy mopey grumpy slimy", id="the-ugly-one">Bippity Boppity Boo!<a href="awesome-possum.com">Link!</a></p>
+#   <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
+#     Bippity Boppity Boo!
+#     <a href="awesome-possum.com">Link!</a>
+#   </p>
 #   <img src="happy-puppy.jpg">
 # </div>
 
 ```
-It doesn't do much to validate your HTML. Put garbage in and you'll get garbage out. That said, it
-tries not to be too particular about how you use it. Arguments are pretty flexible about types, you
-can build things in pretty much any order or direction, and so on.
+
+It does nothing it all to ensure that your HTML is valid, but whatever it gives you should be
+formatted correctly. It tries not to be particular about how you use it-- You can add or change
+anything right up until you call .to_s, and add_content tries to be flexible about the inputs you
+give it.
+
+If you set 'oneline: true' on a parent TagPair and not all its children TagPairs, the output will not be
+pretty. I advise against it.
 
 ## Installation
 
@@ -102,54 +127,55 @@ self-closing tag, meaning it has no content and no closing tag. A `TagPair` is t
      **String**, mandatory. What kind of tag it is; such as 'img' or 'hr'
  - attributes:
      **Hash** `{symbol: array || string}`, optional. Example: `{class: 'myclass plaid'}` 
- - newline: 
-     **Boolean**. Whether to include a line break after the closing tag. Defaults to true.
 
 ### Tag Methods (that you care about)
 
 `Tag.new(element, attributes: {}, newline: true)`
-- Make a new tag.
 
-`.to_s`
-- The big one. Returns your HTML as a string, nondestructively.
+`.to_s` - The big one. Returns your HTML as a string, nondestructively.
 
-`.reset_attributes(hash)`
-- Deletes and overwrites the attributes. Destructive.
+`.reset_attributes(hash)` - Deletes and overwrites the attributes. Destructive.
 
-`.add_attributes(hash)`
-- Appends them instead of overwriting. Destructive.
+`.add_attributes(hash)` - Appends them instead of overwriting. Destructive.
 
 `.element` - returns the element type
 
-`.add_parent(TagPair)`
-returns supplied TagPair, with self added as a child. Nondestructive.
+`.add_parent(TagPair)` - returns supplied TagPair, with self added as a child. Nondestructive.
 
-`attr_reader: .attributes and .element`
-
-`attr_accessor: .newline`
+`attr_reader :attributes, :element`
 
 ### TagPair Properties:
 
  `TagPair` Inherits all of `Tag`'s properties and methods, but adds content and a closing tag.
  - content:
-     **Array**, optional, containing anything (but probably just strings and Tags). Child elements
-     are not rendered until calling `.to_s` on the parent, meaning you can access and modify them
-     after defining a parent.
+     **Array**, optional, containing anything (but probably just strings and Tags. Anything else
+     will be turned into a string with .to_s, which is an alias for .inspect most of the time).
+     Child elements are not rendered until the parent is rendered, meaning you can access and
+     modify them after defining a parent.
+
+- oneline:
+    **Boolean**, optional, defaults to false. When true, the entire element and its content will be
+    rendered as a single line. Otherwise, the opening tag, closing tag, and every element in the
+    content array (including rendered child elements) will get its own line.
 
 ### TagPair Methods (that you care about)
 
-`TagPair.new(element, attributes: {}, newline: true, content: [] || string || anything that knows.to_s)`
- - You can initialize it with content. 
+`TagPair.new(element, attributes: {}, oneline: false, content: anything)`
+ - You can initialize it with content.
 
-`add_content(array, string, or anything else)`
+`add_content(anything)`
+- content is an array. Each element corresponds to a line, except for TagPairs with oneline: false, whose
+    content and tags will each get their own line (as you'd expect).
 
 `attr_accessor: content`
 - You can modify the content array directly if you like.
 
 `.to_s`
-- Just like `Tag`. It splits opening and closing tags to their own lines if the stringified content
-    are longer than 80 characters, or if it includes a line break somewhere. Indentation is
-    hardcoded at two spaces. If you want that to be configurable, pull requests are welcome. 
+- The main rendering method. Indentation is hard-coded at 2 spaces.
+
+`.to_a`
+- Mostly used internally, but if you want an array of strings, each element a line with appropriate
+    indentation applied, this is how you can get it.
 
 ## Contributing
 
