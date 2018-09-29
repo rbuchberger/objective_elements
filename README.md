@@ -2,8 +2,8 @@
 
 # Elements
 
-This is a tiny for building nicely formatted HTML using sane, readable Ruby. I use it for writing 
-jekyll plugins, but you can use it anywhere. It's ~100 lines, with no dependencies.
+This is a tiny gem that builds nicely formatted HTML from sane, readable Ruby. I use it for jekyll 
+plugins, but you can use it anywhere. It's ~100 lines, with no dependencies.
 
 Have you ever tried to build HTML with string concatenation and interpolation? At first it seems
 simple, but once you account for all the what-ifs, the indentation, the closing tags, and the 
@@ -35,7 +35,7 @@ or this:
     end
 ```
 
-That is why I wrote this gem. Here's a demo:
+Whicch is why I wrote this gem. Here's a demo:
 
 ```ruby
 p = TagPair.new 'p'
@@ -93,16 +93,17 @@ div.to_s
 
 ```
 
-It does nothing it all to ensure that your HTML is valid, but whatever it gives you should be
-formatted correctly. It tries not to be particular-- you can add or change anything right up 
-until you call .to_s, and add_content tries to be flexible about the inputs you give it.
-
-If you set 'oneline: true' on a parent TagPair, but not all its children TagPairs, the output will not be
-pretty. I advise against it.
+It does nothing it all to ensure that your HTML is valid. Garbage in, garbage out. If you 
+set 'oneline: true' on a parent TagPair, but not all its children TagPairs, the output will not be pretty. 
+I advise against it.
 
 ## Installation
 
- - coming eventually. It'll be a gem and a require.
+ - coming eventually. It'll be a gem and a require. For now, you can load it from this repo in your gemfile.
+ 
+ ## Configuration
+ 
+ none
  
 ## Usage
 
