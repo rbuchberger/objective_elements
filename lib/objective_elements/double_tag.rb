@@ -18,6 +18,7 @@ class DoubleTag < SingleTag
   def reset_content(new = nil)
     @content = []
     add_content(new) if new
+    self
   end
 
   def add_content(addition)

@@ -33,6 +33,7 @@ class SingleTag
     @attributes.merge! formatted_new do |_key, oldval, newval|
       oldval.concat newval
     end
+    self
   end
   alias_method :add_attribute, :add_attributes
 
