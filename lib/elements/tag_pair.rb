@@ -15,9 +15,9 @@ class TagPair < Tag
   end
 
   # Deletes all content, replaces with parameter (if supplied)
-  def reset_content(new)
+  def reset_content(new = nil)
     @content = []
-    add_content(new)
+    add_content(new) if new
   end
 
   def add_content(addition)
