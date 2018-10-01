@@ -1,18 +1,29 @@
-**This gem is young and untested. Use with caution.**
+# Objective Elements
 
-# Elements
+This is a tiny gem that builds nicely formatted HTML using sane, readable Ruby. I use it for jekyll 
+plugins, but you can use it anywhere. It's ~100 lines, with no runtime dependencies beyond bundler
+and rake.
 
-This is a tiny gem that builds nicely formatted HTML from sane, readable Ruby. I use it for jekyll 
-plugins, but you can use it anywhere. It's ~100 lines, with no dependencies.
+Note: This gem doesn't actually know any HTML. It just knows how it should be formatted.
 
-Have you ever tried to build HTML with string concatenation and interpolation? At first it seems
-simple, but once you account for all the what-ifs, the indentation, the closing tags, and the 
+## How it works:
+
+* Instantiate a `SingleTag` or `DoubleTag`
+
+* Attributes are a Hash, Content is an array. Define them on initialization, or later on.
+
+* Render it with `.to_s`. Get normal HTML without the pain.
+
+## Motivation:
+
+Have you ever tried to build HTML with string concatenation and interpolation? It starts out simply
+enough, but once you account for all the what-ifs, the indentation, the closing tags, and the 
 spaces you only need sometimes, it turns into a horrible mess.
 
 The problem, of course, is that building long, complex, varying blocks of text with string
 concatenation and interpolation is fragile, unreadable, and painful. You know this, but you're not
-going to write an entirely new class just to spit out 10 lines of HTML, so you hammer through it and
-end up with code like this:
+going to write an entirely new class or pull in some big new dependency just for 10 lines of HTML.
+Instead, you just hammer through it and end up with code like this:
 
 ```ruby
 picture_tag = "<picture>\n"\
@@ -35,75 +46,56 @@ or this:
     end
 ```
 
-Whicch is why I wrote this gem. Here's a demo:
+Which is why I sat down and wrote this gem. It's super simple, you probably could have written it
+too, but hey! Now you don't have to. Here's a demo:
+
+## Demo
 
 ```ruby
-p = TagPair.new 'p'
+p = DoubleTag.new 'p'
 p.to_s
 # <p>
 # </p>
 
-p.add_attributes {class: 'stumpy grumpy', id: 'the-ugly-one'}
-p.to_s
-# <p class="stumpy grumpy", id="the-ugly-one">
-# </p>
-
-p.add_attributes {class: 'slimy'}
-p.to_s
-# <p class="stumpy grumpy slimy", id="the-ugly-one">
-# </p>
-
+# Add attributes and content however you like:
+p.add_attributes class: 'stumpy grumpy', id: 'the-ugly-one'
+p.add_attributes class: 'slimy'
 p.add_content 'Bippity Boppity Boo!'
 p.to_s
-# <p class="stumpy grumpy slimy", id="the-ugly-one">
+# <p class="stumpy grumpy slimy" id="the-ugly-one">
 #   Bippity Boppity Boo!
 # </p>
 
+# Want a oneliner?
 p.oneline = true
 p.to_s
-# <p class="stumpy mopey grumpy slimy", id="the-ugly-one">Bippity Boppity Boo!</p>
-
+# <p class="stumpy mopey grumpy slimy" id="the-ugly-one">Bippity Boppity Boo!</p>
 p.oneline = false
-p.add_content TagPair.new 'a', content: 'Link!', attributes: {href: 'awesome-possum.com'}
-p.content[1].oneline = true
-p.to_s
-# <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
-#   Bippity Boppity Boo!
-#   <a href="awesome-possum.com">Link!</a>
-# </p>
 
-div = p.add_parent TagPair.new 'div'
-div.to_s
+# Build it up step by step, or all at once:
+p.add_content DoubleTag.new(
+  'a',
+  content: 'Link!',
+  attributes: {href: 'awesome-possum.com'},
+  oneline: true
+) 
+# Add a parent tag!
+div = p.add_parent DoubleTag.new 'div'
+
+# Ruby implicitly calls .to_s on things when you try to perform string functions with them, meaning
+# cool things like this work:
+"#{div}"
 # <div>
-#   <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
+#   <p class="stumpy mopey grumpy slimy" id="the-ugly-one">
 #     Bippity Boppity Boo!
 #     <a href="awesome-possum.com">Link!</a>
 #   </p>
-# </div>
-
-div.add_content Tag.new 'img', attributes: {src: 'happy-puppy.jpg'}
-div.to_s
-# <div>
-#   <p class="stumpy mopey grumpy slimy", id="the-ugly-one">
-#     Bippity Boppity Boo!
-#     <a href="awesome-possum.com">Link!</a>
-#   </p>
-#   <img src="happy-puppy.jpg">
 # </div>
 
 ```
-
-It does nothing it all to ensure that your HTML is valid. Garbage in, garbage out. If you 
-set 'oneline: true' on a parent TagPair, but not all its children TagPairs, the output will not be pretty. 
-I advise against it.
-
 ## Installation
 
  - coming eventually. It'll be a gem and a require. For now, you can load it from this repo in your gemfile.
- 
- ## Configuration
- 
- none
  
 ## Usage
 
@@ -112,81 +104,151 @@ So we're on the same page, here's the terminology I'm using:
 <p class="stumpy">Hello</p>
 |a|       b      |  c  | d |
 ```
-- a: element
-- b: attributes
-- c: content
-- d: closing tag
+- a    -  element
+- b    -  attributes
+- a+b  -  opening tag
+- c    -  content
+- d    -  closing tag
 
-There are 2 classes: `Tag` is the base class, and `TagPair` inherits from it. A `Tag` is a
-self-closing tag, meaning it has no content and no closing tag. A `TagPair` is the other kind.
+There are 2 classes: `SingleTag` is the base class, and `DoubleTag` inherits from it. A `SingleTag` is a
+self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is the other kind.
 
-### Tag Properties:
+### SingleTag Properties:
 
  - element:
      **String**, mandatory. What kind of tag it is; such as 'img' or 'hr'
  - attributes:
-     **Hash** `{symbol: array || string}`, optional. Example: `{class: 'myclass plaid'}` 
+     **Hash** `{symbol: array or string}`, optional. Example: `{class: 'myclass plaid'}` or `{class:
+     ['myclass', 'plaid']}` 
 
-### Tag Methods (that you care about)
+### SingleTag Methods (that you care about)
 
-`Tag.new(element, attributes: {}, newline: true)`
+`SingleTag.new(element, attributes: {})`
 
 `.to_s` - The big one. Returns your HTML as a string, nondestructively.
 
-`.reset_attributes(hash)` - Deletes and overwrites the attributes. Destructive.
+`.reset_attributes(hash)` - Deletes all attributes, replaces with supplied argument if given.
 
-`.add_attributes(hash)` - Appends them instead of overwriting. Destructive.
+`.add_attributes(hash)` - Appends attributes instead of overwriting them.
 
-`.element` - returns the element type
-
-`.add_parent(TagPair)` - returns supplied TagPair, with self added as a child. Nondestructive.
+`.add_parent(DoubleTag)` - returns supplied DoubleTag, with self added as a child.
 
 `attr_reader :attributes, :element`
 
-### TagPair Properties:
+### DoubleTag Properties:
 
- `TagPair` Inherits all of `Tag`'s properties and methods, but adds content and a closing tag.
+#### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, but adds content and a closing tag.
  - content:
-     **Array**, optional, containing anything (but probably just strings and Tags. Anything else
-     will be turned into a string with .to_s, which is an alias for .inspect most of the time).
+     **Array**, optional, containing anything (but probably just strings and tags. Anything else
+     will be turned into a string with `.to_s`, which is an alias for `.inspect` most of the time).
+
+     Each element in the array corresponds to at least one line of HTML; multiline child tags will
+     get as many lines as they need (like you'd expect).
+
      Child elements are not rendered until the parent is rendered, meaning you can access and
      modify them after defining a parent.
 
-- oneline:
+ - oneline:
     **Boolean**, optional, defaults to false. When true, the entire element and its content will be
-    rendered as a single line. Otherwise, the opening tag, closing tag, and every element in the
-    content array (including rendered child elements) will get its own line.
+    rendered as a single line. Useful for anchor tags and list items.
 
-### TagPair Methods (that you care about)
+### DoubleTag Methods (that you care about)
 
-`TagPair.new(element, attributes: {}, oneline: false, content: anything)`
+`DoubleTag.new(element, attributes: {}, oneline: false, content: [])`
  - You can initialize it with content.
 
 `add_content(anything)`
-- content is an array. Each element corresponds to a line, except for TagPairs with oneline: false, whose
-    content and tags will each get their own line (as you'd expect).
+ - Smart enough to handle both arrays and not-arrays without getting dorked up.
 
 `attr_accessor: content`
-- You can modify the content array directly if you like.
-
-`.to_s`
-- The main rendering method. Indentation is hard-coded at 2 spaces.
+- You can modify the content array directly if you like. If you're just adding items, you should use
+    `.add_content`
 
 `.to_a`
 - Mostly used internally, but if you want an array of strings, each element a line with appropriate
     indentation applied, this is how you can get it.
 
+## Configuration
+ 
+ Indentation is defined by the `indent` method on the DoubleTag class. If you'd like to change
+ it:
+
+ 1. Make a new class, inherit from DoubleTag.
+ 2. Override `indent` with whatever you want.
+ 3. Use your new class instead of DoubleTag.
+
+ Example:
+
+ ```ruby
+
+ class MyDoubleTag < DoubleTag
+  def indent
+    # 4 escaped spaces:
+    "\ \ \ \ "
+  end
+ end
+
+MyDoubleTag.new('p', content: 'hello').to_s
+# <p>
+#     hello
+# </p>
+
+ ```
+
+ ## Limitations
+
+* It actually doesn't know a single HTML element on its own, so it does nothing to ensure that
+    your HTML is valid. Garbage in, garbage out.
+
+* A parent tag can't put siblings on the same line. You can either
+    do this (with `oneline: true` on the strong tag):
+
+    ```html
+
+      Here is some
+      <strong>strong</strong>
+      text.
+
+    ```
+    or this (default behavior):
+
+    ```html
+
+      Here is some
+      <strong>
+        strong
+      </strong>
+      text.
+
+    ```
+    But you can't do this without string interpolation:
+
+    ```html
+
+    Here is some <strong>strong</strong> text. 
+
+    ```
+    It doesn't affect how the browser will render it, but it might bug you if you're particular about
+    source code layout.
+
+* If you set 'oneline: true' on a parent DoubleTag, but not all its children DoubleTags, the output
+    will not be pretty. I advise against it.
+
+* It doesn't wrap long lines of text, and it doesn't indent text with newlines embedded. It's on the
+    TODO list.
+
 ## Contributing
 
-I would really love some help on this one. The basic functionality is there, but there are surely
-loads of bugs, and I haven't written any tests. I'm considering introducing 'preset' functionality,
-where you can do something like `ElementFactory.p` to get a paragraph tag, but it's a bit of work
-and I'm not convinced it's any easier than `TagPair.new 'p'`
+For code style, I've been using rubocop with the default settings and would appreciate if you did the
+same.
 
-For pull requests, I've been using rubocop with the default settings and would appreciate if you did
-the same.
+If you add new functionality, or change existing functionality, please update the rspec tests to
+reflect it.
 
-https://github.com/rbuchberger/elements
+https://github.com/rbuchberger/objective_elements
+
+contact:
+robert@robert-buchberger.com
 
 ## License
 
