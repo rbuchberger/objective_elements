@@ -26,6 +26,10 @@ class DoubleTag < SingleTag
     self
   end
 
+  def indent
+    "\ \ "
+  end
+
   def to_a
     lines = content.map do |c|
       if c.is_a? SingleTag
@@ -34,7 +38,7 @@ class DoubleTag < SingleTag
         c.to_s.dup
       end
     end
-    lines = lines.flatten.map { |l| l.prepend oneline ? '' : "\ \ " }
+    lines = lines.flatten.map { |l| l.prepend oneline ? '' : indent }
     lines.unshift(opening_tag).push(closing_tag)
   end
 
