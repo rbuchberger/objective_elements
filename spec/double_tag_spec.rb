@@ -1,8 +1,8 @@
-require 'elements'
-RSpec.describe TagPair do
+require 'objective_elements'
+RSpec.describe DoubleTag do
   context 'no content' do
     before(:each) do
-      @t = TagPair.new('p', attributes: { class: 'awesome' })
+      @t = DoubleTag.new('p', attributes: { class: 'awesome' })
     end
 
     it 'renders multiline' do
@@ -32,12 +32,12 @@ RSpec.describe TagPair do
   context 'with content' do
     before(:each) do
       @content = [
-        TagPair.new('p'),
-        Tag.new('hr'),
+        DoubleTag.new('p'),
+        SingleTag.new('hr'),
         'example text'
       ]
 
-      @t = TagPair.new 'div', content: @content
+      @t = DoubleTag.new 'div', content: @content
 
       # Indentation, for convenience:
       @i = "\ \ "
@@ -79,7 +79,7 @@ RSpec.describe TagPair do
     end
 
     it 'indents multiple levels correctly' do
-      q = @t.add_parent TagPair.new 'main'
+      q = @t.add_parent DoubleTag.new 'main'
 
       expect(q.to_s).to eql(
         "<main>\n#{@i}<div>\n#{@i * 2}<p>\n#{@i * 2}"\

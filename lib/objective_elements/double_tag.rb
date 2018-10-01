@@ -28,7 +28,7 @@ class DoubleTag < SingleTag
 
   def to_a
     lines = content.map do |c|
-      if c.is_a? Tag
+      if c.is_a? SingleTag
         c.to_a
       else
         c.to_s.dup

@@ -1,5 +1,5 @@
-require 'elements'
-RSpec.describe Tag do
+require 'objective_elements'
+RSpec.describe SingleTag do
   context 'simple tag' do
     before(:each) do
       @t = described_class.new('hr')
@@ -54,7 +54,7 @@ RSpec.describe Tag do
     end
 
     it 'adds a parent' do
-      d = @t.add_parent TagPair.new 'div'
+      d = @t.add_parent DoubleTag.new 'div'
 
       expect(d.content).to eql([@t])
     end
