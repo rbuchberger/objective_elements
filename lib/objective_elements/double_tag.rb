@@ -1,5 +1,5 @@
 # Non-Self-Closing tag. Can have content, but doesn't have to.
-class TagPair < Tag
+class DoubleTag < SingleTag
   attr_accessor :content, :oneline
   # content is an array of anything. Entries will be inserted sequentially in
   # between the opening and closing tags.

@@ -1,6 +1,6 @@
 # Collection of HTML element tags
 # Describes a basic, self-closing HTML tag.
-class Tag
+class SingleTag
   attr_reader :attributes
   attr_accessor :element
 
