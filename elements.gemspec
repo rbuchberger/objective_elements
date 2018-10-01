@@ -1,15 +1,15 @@
 lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'elements_are_objects/version'
+require 'objective_elements/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'elem_are_objects'
-  spec.version       = ElementsAreObjects::VERSION
+  spec.name          = 'objective_elements'
+  spec.version       = ObjectiveElements::VERSION
   spec.authors       = ['Robert Buchberger']
   spec.email         = ['robert@robert-buchberger.com']
 
   spec.summary       = 'Build HTML without interpolating strings.'
-  spec.homepage      = 'https://github.com/rbuchberger/elements_are_objects'
+  spec.homepage      = 'https://github.com/rbuchberger/objective_elements'
   spec.license       = 'MIT'
 
   if spec.respond_to?(:metadata)
