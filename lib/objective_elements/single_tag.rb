@@ -23,7 +23,29 @@ class SingleTag
   # This is the only way we add new attributes. Flexible about what you give
   # it-- accepts both strings and symbols for the keys, and both strings and
   # arrays for the values.
+
   def add_attributes(new)
+    if new.is_a? String
+      add_string_attributes(new)
+    else
+      add_hash_attributes(new)
+    end
+  end
+  alias_method :add_attribute, :add_attributes
+
+  def add_string_attributes(new)
+    # looking for something like:
+    # 'class="something something-else" id="my-id"'
+    new_hash = {}
+    new.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
+      # [['class','something something-else'],['id','my-id']]
+      new_hash[m.shift] = m.pop
+    end
+
+    add_hash_attributes(new_hash)
+  end
+
+  def add_hash_attributes(new)
     formatted_new = {}
     new.each_pair do |k, v|
       v = v.split ' ' if v.is_a? String
@@ -35,7 +57,6 @@ class SingleTag
     end
     self
   end
-  alias_method :add_attribute, :add_attributes
 
   # Turns attributes into a string we can insert.
   def render_attributes

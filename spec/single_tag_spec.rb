@@ -10,12 +10,18 @@ RSpec.describe SingleTag do
     end
 
     it 'adds string attributes' do
+      @t.add_attributes 'class="stumpy"'
+
+      expect(@t.attributes).to eql(class: ['stumpy'])
+    end
+
+    it 'adds hash with string attributes' do
       @t.add_attributes class: 'stumpy'
 
       expect(@t.attributes).to eql(class: ['stumpy'])
     end
 
-    it 'adds array attributes' do
+    it 'adds hash with array attributes' do
       @t.add_attributes class: ['stumpy']
 
       expect(@t.attributes).to eql(class: ['stumpy'])
