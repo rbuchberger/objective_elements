@@ -1,18 +1,17 @@
 # Objective Elements
 
 This is a tiny gem that builds nicely formatted HTML using sane, readable Ruby. I use it for jekyll 
-plugins, but you can use it anywhere. It's ~100 lines, with no runtime dependencies beyond bundler
-and rake.
+plugins, but you can use it anywhere. It's ~100 lines, tested with rspec, and has no dependencies.
 
-Note: This gem doesn't actually know any HTML. It just knows how it should be formatted.
+This gem doesn't actually know any HTML. It just knows how to format it.
 
 ## How it works:
 
 * Instantiate a `SingleTag` or `DoubleTag`
 
-* Attributes are a Hash, Content is an array. Define them on initialization, or later on.
+* Add attributes & content in one of a few ways. Nest tags infinitely.
 
-* Render it with `.to_s`. Get normal HTML without the pain.
+* Render it with `.to_s`
 
 ## Motivation:
 
@@ -23,7 +22,7 @@ spaces you only need sometimes, it turns into a horrible mess.
 The problem, of course, is that building long, complex, varying blocks of text with string
 concatenation and interpolation is fragile, unreadable, and painful. You know this, but you're not
 going to write an entirely new class or pull in some big new dependency just for 10 lines of HTML.
-Instead, you just hammer through it and end up with code like this:
+Instead, you hammer through it and end up with code like this:
 
 ```ruby
 picture_tag = "<picture>\n"\
@@ -57,19 +56,20 @@ p.to_s
 # <p>
 # </p>
 
-# Add attributes and content however you like:
-p.add_attributes class: 'stumpy grumpy', id: 'the-ugly-one'
-p.add_attributes class: 'slimy'
-p.add_content 'Bippity Boppity Boo!'
+# Add attributes as a hash, values can be strings or symbols:
+p.add_attributes class: 'stumpy grumpy', 'id' => 'the-ugly-one'
+# Add them as a string!
+p.add_attributes 'class="slimy" data-awesomeness="11"'
+p.add_content "Icky"
 p.to_s
-# <p class="stumpy grumpy slimy" id="the-ugly-one">
-#   Bippity Boppity Boo!
+# <p class="stumpy grumpy slimy" id="the-ugly-one" data-awesomeness="11">
+#   Icky
 # </p>
 
 # Want a oneliner?
 p.oneline = true
 p.to_s
-# <p class="stumpy mopey grumpy slimy" id="the-ugly-one">Bippity Boppity Boo!</p>
+# <p class="stumpy mopey grumpy slimy" id="the-ugly-one" data-awesomeness="11">Icky</p>
 p.oneline = false
 
 # Build it up step by step, or all at once:
@@ -78,16 +78,16 @@ p.add_content DoubleTag.new(
   content: 'Link!',
   attributes: {href: 'awesome-possum.com'},
   oneline: true
-) 
+)
 # Add a parent tag!
 div = p.add_parent DoubleTag.new 'div'
 
-# Ruby implicitly calls .to_s on things when you try to perform string functions with them, meaning
-# cool things like this work:
+# Ruby implicitly calls .to_s on things when you try to perform string functions with them, so
+# things like this work:
 "#{div}"
 # <div>
-#   <p class="stumpy mopey grumpy slimy" id="the-ugly-one">
-#     Bippity Boppity Boo!
+#   <p class="stumpy mopey grumpy slimy" id="the-ugly-one" data-awesomeness="11">
+#     Icky
 #     <a href="awesome-possum.com">Link!</a>
 #   </p>
 # </div>
@@ -95,9 +95,18 @@ div = p.add_parent DoubleTag.new 'div'
 ```
 ## Installation
 
- - coming eventually. It'll be a gem and a require. For now, you can load it from this repo in your gemfile.
+ ```ruby
+ # Gemfile
  
-## Usage
+ gem 'objective_elements', '~> 0.1.2'
+ ```
+ 
+ ```ruby
+ # Wherever you need to use it:
+ 
+ require 'objective_elements'
+ ```
+## Terminology
 
 So we're on the same page, here's the terminology I'm using:
 ```
@@ -113,13 +122,21 @@ So we're on the same page, here's the terminology I'm using:
 There are 2 classes: `SingleTag` is the base class, and `DoubleTag` inherits from it. A `SingleTag` is a
 self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is the other kind.
 
+## Usage
+
 ### SingleTag Properties:
 
- - element:
-     **String**, mandatory. What kind of tag it is; such as 'img' or 'hr'
- - attributes:
-     **Hash** `{symbol: array or string}`, optional. Example: `{class: 'myclass plaid'}` or `{class:
-     ['myclass', 'plaid']}` 
+ #### element
+ - String
+ - Mandatory
+ - Which type of tag it is, such as 'hr' or 'img'
+ - Defined on initialization, cannot be changed afterwards. (Should it be? I'm on the fence about it.)
+     
+ #### attributes
+  - Hash 
+  - Optional
+  - Keys are symbols, values are arrays of strings. `{class: ['stumpy', 'slimy']}`
+  - add them with `.add_attributes`, which can accept a few different formats.
 
 ### SingleTag Methods (that you care about)
 
@@ -127,9 +144,9 @@ self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is
 
 `.to_s` - The big one. Returns your HTML as a string, nondestructively.
 
-`.reset_attributes(hash)` - Deletes all attributes, replaces with supplied argument if given.
+`.reset_attributes(new)` - Deletes all attributes, calls add_attributes on supplied argument if given.
 
-`.add_attributes(hash)` - Appends attributes instead of overwriting them.
+`.add_attributes(new)` - The only way we add new attributes. Can accept a hash (keys can be either symbols or strings), or a string in the standard HTML syntax (`attribute="value" attribute2="value2 value3"`). Returns self. 
 
 `.add_parent(DoubleTag)` - returns supplied DoubleTag, with self added as a child.
 
@@ -138,34 +155,31 @@ self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is
 ### DoubleTag Properties:
 
 #### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, but adds content and a closing tag.
- - content:
-     **Array**, optional, containing anything (but probably just strings and tags. Anything else
-     will be turned into a string with `.to_s`, which is an alias for `.inspect` most of the time).
+ #### content
+   - Array
+   - Optional
+   - Contains anything (but probably just strings and tags. Anything else will be turned into a string with `.to_s`, which is an alias for `.inspect` most of the time).
+   - Each element in the array corresponds to at least one line of HTML
+   - Multiline child tags will get as many lines as they need (like you'd expect).
+   - Child elements are not rendered until the parent is rendered, meaning you can access and
+   modify them after defining a parent.
+   - add with `.add_content`, or modify the content array directly.
 
-     Each element in the array corresponds to at least one line of HTML; multiline child tags will
-     get as many lines as they need (like you'd expect).
-
-     Child elements are not rendered until the parent is rendered, meaning you can access and
-     modify them after defining a parent.
-
- - oneline:
-    **Boolean**, optional, defaults to false. When true, the entire element and its content will be
-    rendered as a single line. Useful for anchor tags and list items.
+ #### oneline
+  - Boolean
+  - optional, defaults to false.
+  - When true, the entire element and its content will be rendered as a single line. Useful for anchor tags and list items.
 
 ### DoubleTag Methods (that you care about)
 
-`DoubleTag.new(element, attributes: {}, oneline: false, content: [])`
- - You can initialize it with content.
+`DoubleTag.new(element, attributes: {}, oneline: false, content: [])` - You can initialize it with content.
 
-`add_content(anything)`
- - Smart enough to handle both arrays and not-arrays without getting dorked up.
+`add_content(anything)` - Smart enough to handle both arrays and not-arrays without getting dorked up.
 
-`attr_accessor: content`
-- You can modify the content array directly if you like. If you're just adding items, you should use
+`attr_accessor: content` - You can modify the content array directly if you like. If you're just adding items, you should use
     `.add_content`
 
-`.to_a`
-- Mostly used internally, but if you want an array of strings, each element a line with appropriate
+`.to_a` - Mostly used internally, but if you want an array of strings, each element a line with appropriate
     indentation applied, this is how you can get it.
 
 ## Configuration
@@ -180,6 +194,8 @@ self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is
  Example:
 
  ```ruby
+ 
+ require 'ojbective_elements'
 
  class MyDoubleTag < DoubleTag
   def indent
@@ -197,8 +213,8 @@ MyDoubleTag.new('p', content: 'hello').to_s
 
  ## Limitations
 
-* It actually doesn't know a single HTML element on its own, so it does nothing to ensure that
-    your HTML is valid. Garbage in, garbage out.
+* It doesn't know a single HTML element on its own, so it does nothing to ensure your 
+    HTML is valid. Garbage in, garbage out.
 
 * A parent tag can't put siblings on the same line. You can either
     do this (with `oneline: true` on the strong tag):
@@ -228,7 +244,7 @@ MyDoubleTag.new('p', content: 'hello').to_s
     Here is some <strong>strong</strong> text. 
 
     ```
-    It doesn't affect how the browser will render it, but it might bug you if you're particular about
+    This doesn't affect how the browser will render it, but it might bug you if you're particular about
     source code layout.
 
 * If you set 'oneline: true' on a parent DoubleTag, but not all its children DoubleTags, the output
