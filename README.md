@@ -3,7 +3,7 @@
 This is a tiny gem that builds nicely formatted HTML using sane, readable Ruby. I use it for jekyll
 plugins, but you can use it anywhere. It's ~100 lines, tested with rspec, and has no dependencies.
 
-This gem doesn't actually know any HTML. It just knows how to format it.
+It doesn't actually know any HTML, just how to format it.
 
 ## How it works:
 
@@ -21,14 +21,13 @@ you only need sometimes, it turns into a horrible mess.
 
 The problem, of course, is that building long, complex, varying blocks of text with string
 concatenation and interpolation is fragile, unreadable, and painful. You know this, but you're not
-going to write an entirely new class or pull in some big new dependency just for 10 lines of HTML.
-Instead, you hammer through it and end up with code like this:
+going to write an entirely new class or pull in some big new dependency just for 10 lines of HTML, 
+so instead you hammer through it and end up with code like this:
 
 ```ruby
 picture_tag = "<picture>\n"\
-                      "#{source_tags}"\
-                      "#{markdown_escape * 4}<img src=\"#{url}#{instance['source_default'][:generated_src]}\" #{html_attr_string}>\n"\
-"#{markdown_escape * 2}</picture>\n"
+              "#{source_tags}"\
+              "#{markdown_escape * 4}<img src=\"#{url}#{instance['source_default'][:generated_src]}\" #{html_attr_string}>\n"\"#{markdown_escape * 2}</picture>\n"
 ```
 
 or this: 
@@ -119,11 +118,12 @@ So we're on the same page, here's the terminology I'm using:
 - c    -  content
 - d    -  closing tag
 
+
+## Usage
+
 There are 2 classes: `SingleTag` is the base class, and `DoubleTag` inherits from it. A `SingleTag`
 is a self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is the other
 kind.
-
-## Usage
 
 ### SingleTag Properties:
 
@@ -149,8 +149,8 @@ kind.
 given.
 
 `.add_attributes(new)` - The only way we add new attributes. Can accept a hash (keys can be either
-symbols or strings), or a string in the standard HTML syntax (`attribute="value" attribute2="value2
-value3"`). Returns self. 
+symbols or strings, values can be either arrays or strings), or a string in the standard HTML 
+syntax (`attribute="value" attribute2="value2 value3"`). Returns self. 
 
 `.add_parent(DoubleTag)` - returns supplied DoubleTag, with self added as a child.
 
@@ -158,7 +158,7 @@ value3"`). Returns self.
 
 ### DoubleTag Properties:
 
-#### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, but adds content and a closing tag.
+#### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, and adds content and a closing tag.
 
  #### content
 
