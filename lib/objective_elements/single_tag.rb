@@ -33,31 +33,6 @@ class SingleTag
   end
   alias_method :add_attribute, :add_attributes
 
-  def add_string_attributes(new)
-    # looking for something like:
-    # 'class="something something-else" id="my-id"'
-    new_hash = {}
-    new.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
-      # [['class','something something-else'],['id','my-id']]
-      new_hash[m.shift] = m.pop
-    end
-
-    add_hash_attributes(new_hash)
-  end
-
-  def add_hash_attributes(new)
-    formatted_new = {}
-    new.each_pair do |k, v|
-      v = v.split ' ' if v.is_a? String
-      formatted_new[k.to_sym] = v
-    end
-
-    @attributes.merge! formatted_new do |_key, oldval, newval|
-      oldval.concat newval
-    end
-    self
-  end
-
   # Turns attributes into a string we can insert.
   def render_attributes
     attribute_string = ''
@@ -86,4 +61,32 @@ class SingleTag
   def to_s
     opening_tag + "\n"
   end
+
+  private
+
+  def add_string_attributes(new)
+    # looking for something like:
+    # 'class="something something-else" id="my-id"'
+    new_hash = {}
+    new.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
+      # [['class','something something-else'],['id','my-id']]
+      new_hash[m.shift] = m.pop
+    end
+
+    add_hash_attributes(new_hash)
+  end
+
+  def add_hash_attributes(new)
+    formatted_new = {}
+    new.each_pair do |k, v|
+      v = v.split ' ' if v.is_a? String
+      formatted_new[k.to_sym] = v
+    end
+
+    @attributes.merge! formatted_new do |_key, oldval, newval|
+      oldval.concat newval
+    end
+    self
+  end
+
 end
