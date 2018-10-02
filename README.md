@@ -1,6 +1,6 @@
 # Objective Elements
 
-This is a tiny gem that builds nicely formatted HTML using sane, readable Ruby. I use it for jekyll 
+This is a tiny gem that builds nicely formatted HTML using sane, readable Ruby. I use it for jekyll
 plugins, but you can use it anywhere. It's ~100 lines, tested with rspec, and has no dependencies.
 
 This gem doesn't actually know any HTML. It just knows how to format it.
@@ -16,8 +16,8 @@ This gem doesn't actually know any HTML. It just knows how to format it.
 ## Motivation:
 
 Have you ever tried to build HTML with string concatenation and interpolation? It starts out simply
-enough, but once you account for all the what-ifs, the indentation, the closing tags, and the 
-spaces you only need sometimes, it turns into a horrible mess.
+enough, but once you account for all the what-ifs, the indentation, the closing tags, and the spaces
+you only need sometimes, it turns into a horrible mess.
 
 The problem, of course, is that building long, complex, varying blocks of text with string
 concatenation and interpolation is fragile, unreadable, and painful. You know this, but you're not
@@ -98,7 +98,7 @@ div = p.add_parent DoubleTag.new 'div'
  ```ruby
  # Gemfile
  
- gem 'objective_elements', '~> 0.1.2'
+ gem 'objective_elements', '~> 0.2.0'
  ```
  
  ```ruby
@@ -119,8 +119,9 @@ So we're on the same page, here's the terminology I'm using:
 - c    -  content
 - d    -  closing tag
 
-There are 2 classes: `SingleTag` is the base class, and `DoubleTag` inherits from it. A `SingleTag` is a
-self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is the other kind.
+There are 2 classes: `SingleTag` is the base class, and `DoubleTag` inherits from it. A `SingleTag`
+is a self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is the other
+kind.
 
 ## Usage
 
@@ -144,9 +145,12 @@ self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is
 
 `.to_s` - The big one. Returns your HTML as a string, nondestructively.
 
-`.reset_attributes(new)` - Deletes all attributes, calls add_attributes on supplied argument if given.
+`.reset_attributes(new)` - Deletes all attributes, calls add_attributes on supplied argument if
+given.
 
-`.add_attributes(new)` - The only way we add new attributes. Can accept a hash (keys can be either symbols or strings), or a string in the standard HTML syntax (`attribute="value" attribute2="value2 value3"`). Returns self. 
+`.add_attributes(new)` - The only way we add new attributes. Can accept a hash (keys can be either
+symbols or strings), or a string in the standard HTML syntax (`attribute="value" attribute2="value2
+value3"`). Returns self. 
 
 `.add_parent(DoubleTag)` - returns supplied DoubleTag, with self added as a child.
 
@@ -155,32 +159,38 @@ self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is
 ### DoubleTag Properties:
 
 #### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, but adds content and a closing tag.
+
  #### content
+
    - Array
    - Optional
-   - Contains anything (but probably just strings and tags. Anything else will be turned into a string with `.to_s`, which is an alias for `.inspect` most of the time).
+   - Contains anything (but probably just strings and tags. Anything else will be turned into a
+     string with `.to_s`, which is an alias for `.inspect` most of the time).
    - Each element in the array corresponds to at least one line of HTML
    - Multiline child tags will get as many lines as they need (like you'd expect).
    - Child elements are not rendered until the parent is rendered, meaning you can access and
-   modify them after defining a parent.
+     modify them after defining a parent.
    - add with `.add_content`, or modify the content array directly.
 
  #### oneline
   - Boolean
   - optional, defaults to false.
-  - When true, the entire element and its content will be rendered as a single line. Useful for anchor tags and list items.
+  - When true, the entire element and its content will be rendered as a single line. Useful for
+    anchor tags and list items.
 
 ### DoubleTag Methods (that you care about)
 
-`DoubleTag.new(element, attributes: {}, oneline: false, content: [])` - You can initialize it with content.
+`DoubleTag.new(element, attributes: {}, oneline: false, content: [])` - You can initialize it with
+content.
 
-`add_content(anything)` - Smart enough to handle both arrays and not-arrays without getting dorked up.
+`add_content(anything)` - Smart enough to handle both arrays and not-arrays without getting dorked
+up.
 
-`attr_accessor: content` - You can modify the content array directly if you like. If you're just adding items, you should use
-    `.add_content`
+`attr_accessor: content` - You can modify the content array directly if you like. If you're just
+adding items, you should use `.add_content`
 
-`.to_a` - Mostly used internally, but if you want an array of strings, each element a line with appropriate
-    indentation applied, this is how you can get it.
+`.to_a` - Mostly used internally, but if you want an array of strings, each element a line with
+appropriate indentation applied, this is how you can get it.
 
 ## Configuration
  
@@ -214,10 +224,10 @@ MyDoubleTag.new('p', content: 'hello').to_s
  ## Limitations
 
 * It doesn't know a single HTML element on its own, so it does nothing to ensure your 
-    HTML is valid. Garbage in, garbage out.
+  HTML is valid. Garbage in, garbage out.
 
 * A parent tag can't put siblings on the same line. You can either
-    do this (with `oneline: true` on the strong tag):
+  do this (with `oneline: true` on the strong tag):
 
     ```html
 
@@ -248,10 +258,10 @@ MyDoubleTag.new('p', content: 'hello').to_s
     source code layout.
 
 * If you set 'oneline: true' on a parent DoubleTag, but not all its children DoubleTags, the output
-    will not be pretty. I advise against it.
+  will not be pretty. I advise against it.
 
 * It doesn't wrap long lines of text, and it doesn't indent text with newlines embedded. It's on the
-    TODO list.
+  TODO list.
 
 ## Contributing
 
