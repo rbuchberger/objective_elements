@@ -22,10 +22,16 @@ RSpec.describe DoubleTag do
       expect(@t.to_a).to eql(['<p class="awesome">', '</p>'])
     end
 
-    it 'adds content' do
+    it 'adds content as a single item' do
       @t.add_content 'hello'
 
       expect(@t.content).to eql(['hello'])
+    end
+
+    it 'adds content as an array' do
+      @t.add_content %w[hello laddy]
+
+      expect(@t.content).to eql(%w[hello laddy])
     end
   end
 
