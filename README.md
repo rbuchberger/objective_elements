@@ -62,7 +62,7 @@ p.to_s
 # <p>
 # </p>
 
-# Add attributes as a hash. keys can be strings or symbols, values can be hashes or strings:
+# Add attributes as a hash. keys can be strings or symbols, values can be arrays or strings:
 p.add_attributes class: 'stumpy grumpy', 'id' => 'the-ugly-one'
 
 # Add attributes as a string!
