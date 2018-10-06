@@ -5,11 +5,16 @@ plugins, but you can use it anywhere. It's ~100 lines, tested with rspec, and ha
 
 It doesn't actually know any HTML, just how to format it.
 
+This is meant to be less involved and more flexible than nokogiri's XML/HTML generator. There's no
+DSL to learn, and no cleverness to wrap your mind around. Its specialty is taking fragmented,
+disjointed information and condensing it into a string of properly formatted HTML. It's as agnostic
+as possible on the input, while being extremely consistent with its output.
+
 ## How it works:
 
 * Instantiate a `SingleTag` or `DoubleTag`
 
-* Add attributes & content in one of a few ways. Nest tags infinitely.
+* Add attributes & content. Nest tags infinitely.
 
 * Render it with `.to_s`
 
@@ -27,7 +32,9 @@ so instead you hammer through it and end up with code like this:
 ```ruby
 picture_tag = "<picture>\n"\
               "#{source_tags}"\
-              "#{markdown_escape * 4}<img src=\"#{url}#{instance['source_default'][:generated_src]}\" #{html_attr_string}>\n"\"#{markdown_escape * 2}</picture>\n"
+              "#{markdown_escape * 4}"\
+              "<img src=\"#{url}#{instance['source_default'][:generated_src]}\" "\
+              "#{html_attr_string}>\n"\"#{markdown_escape * 2}</picture>\n"
 ```
 
 or this: 
@@ -55,11 +62,15 @@ p.to_s
 # <p>
 # </p>
 
-# Add attributes as a hash, values can be strings or symbols:
+# Add attributes as a hash. keys can be strings or symbols, values can be hashes or strings:
 p.add_attributes class: 'stumpy grumpy', 'id' => 'the-ugly-one'
-# Add them as a string!
+
+# Add attributes as a string!
 p.add_attributes 'class="slimy" data-awesomeness="11"'
+
+# Add content. It can be anything, or an array of anythings.
 p.add_content "Icky"
+
 p.to_s
 # <p class="stumpy grumpy slimy" id="the-ugly-one" data-awesomeness="11">
 #   Icky
@@ -68,21 +79,22 @@ p.to_s
 # Want a oneliner?
 p.oneline = true
 p.to_s
-# <p class="stumpy mopey grumpy slimy" id="the-ugly-one" data-awesomeness="11">Icky</p>
+# <p class="stumpy grumpy slimy" id="the-ugly-one" data-awesomeness="11">Icky</p>
 p.oneline = false
 
-# Build it up step by step, or all at once:
+# Build a tag all at once:
 p.add_content DoubleTag.new(
   'a',
   content: 'Link!',
   attributes: {href: 'awesome-possum.com'},
   oneline: true
 )
-# Add a parent tag!
+
+# Add a parent tag:
 div = p.add_parent DoubleTag.new 'div'
 
 # Ruby implicitly calls .to_s on things when you try to perform string functions with them, so
-# things like this work:
+# this works:
 "#{div}"
 # <div>
 #   <p class="stumpy mopey grumpy slimy" id="the-ugly-one" data-awesomeness="11">
@@ -131,12 +143,11 @@ kind.
  - String
  - Mandatory
  - Which type of tag it is, such as 'hr' or 'img'
- - Defined on initialization, cannot be changed afterwards. (Should it be? I'm on the fence about it.)
      
  #### attributes
   - Hash 
   - Optional
-  - Keys are symbols, values are arrays of strings. `{class: ['stumpy', 'slimy']}`
+  - Keys are stored as symbols, values are stored as arrays of strings: `{class: ['stumpy', 'slimy']}`
   - add them with `.add_attributes`, which can accept a few different formats.
 
 ### SingleTag Methods (that you care about)
@@ -148,13 +159,14 @@ kind.
 `.reset_attributes(new)` - Deletes all attributes, calls add_attributes on supplied argument if
 given.
 
-`.add_attributes(new)` - The only way we add new attributes. Can accept a hash (keys can be either
-symbols or strings, values can be either arrays or strings), or a string in the standard HTML 
-syntax (`attribute="value" attribute2="value2 value3"`). Returns self. 
+`.add_attributes(new)` - The strongly recommended way to add new attributes. Can accept a hash (keys
+can be either symbols or strings, values can be either arrays or strings), or a string in the
+standard HTML syntax (`attribute="value" attribute2="value2 value3"`). Returns self. 
 
 `.add_parent(DoubleTag)` - returns supplied DoubleTag, with self added as a child.
 
-`attr_reader :attributes, :element`
+`attr_reader :attributes`
+`attr_accessor :element`
 
 ### DoubleTag Properties:
 
@@ -184,7 +196,9 @@ syntax (`attribute="value" attribute2="value2 value3"`). Returns self.
 content.
 
 `add_content(anything)` - Smart enough to handle both arrays and not-arrays without getting dorked
-up.
+up. When given an array, its elements will be appended to the content array. When given a single
+item, that item will be inserted at the end of the array. (Remember each element in the content
+array gets at least one line!)
 
 `attr_accessor: content` - You can modify the content array directly if you like. If you're just
 adding items, you should use `.add_content`
@@ -194,8 +208,8 @@ appropriate indentation applied, this is how you can get it.
 
 ## Configuration
  
- Indentation is defined by the `indent` method on the DoubleTag class. If you'd like to change
- it:
+ Indentation is defined by the `indent` method on the DoubleTag class, which is two markdown-escaped
+ spaces by default ("\ \ "). If you'd like to change it:
 
  1. Make a new class, inherit from DoubleTag.
  2. Override `indent` with whatever you want.
@@ -223,11 +237,10 @@ MyDoubleTag.new('p', content: 'hello').to_s
 
  ## Limitations
 
-* It doesn't know a single HTML element on its own, so it does nothing to ensure your 
-  HTML is valid. Garbage in, garbage out.
+* It doesn't know a single HTML element on its own, so it does nothing to ensure your HTML is valid.
 
-* A parent tag can't put siblings on the same line. You can either
-  do this (with `oneline: true` on the strong tag):
+* A parent tag can't put siblings on the same line. You can either do this (with `oneline: true` on
+   the strong tag):
 
     ```html
 
@@ -247,7 +260,7 @@ MyDoubleTag.new('p', content: 'hello').to_s
       text.
 
     ```
-    But you can't do this without string interpolation:
+    But you can't do this without string interpolation or something:
 
     ```html
 
@@ -258,7 +271,7 @@ MyDoubleTag.new('p', content: 'hello').to_s
     source code layout.
 
 * If you set 'oneline: true' on a parent DoubleTag, but not all its children DoubleTags, the output
-  will not be pretty. I advise against it.
+  will not be pretty. I advise against it. Handling this situation is on the TODO list.
 
 * It doesn't wrap long lines of text, and it doesn't indent text with newlines embedded. It's on the
   TODO list.
