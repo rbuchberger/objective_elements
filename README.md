@@ -104,6 +104,11 @@ div = p.add_parent DoubleTag.new 'div'
 # </div>
 
 ```
+
+For complete example usage, see [jekyll_icon_list](https://github.com/rbuchberger/jekyll_icon_list), or
+this [pull request](https://github.com/robwierzbowski/jekyll-picture-tag/pull/87/commits/d6b2deca0f19f173251a2984037e5e5f8d7c21d1)
+to [jekyll-picture-tag](https://github.com/robwierzbowski/jekyll-picture-tag).
+
 ## Installation
 
  ```ruby
