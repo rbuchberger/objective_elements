@@ -161,14 +161,22 @@ kind.
 
 `.to_s` - The big one. Returns your HTML as a string, nondestructively.
 
-`.reset_attributes(new)` - Deletes all attributes, calls add_attributes on supplied argument if
-given.
-
 `.add_attributes(new)` - The strongly recommended way to add new attributes. Can accept a hash (keys
 can be either symbols or strings, values can be either arrays or strings), or a string in the
 standard HTML syntax (`attribute="value" attribute2="value2 value3"`). Returns self. 
 
+`.reset_attributes(new)` - Deletes all attributes, calls add_attributes on supplied argument if
+given.
+
+`.delete_attributes(keys)` - Accepts a single attribute, or an array of attributes (keys or
+strings), and deletes it.
+
+`.rewrite_attributes` - Accepts anything add_attributes understands, but replaces existing
+attributes instead of appending to them.
+
 `.add_parent(DoubleTag)` - returns supplied DoubleTag, with self added as a child.
+
+
 
 `attr_reader :attributes`
 `attr_accessor :element`
