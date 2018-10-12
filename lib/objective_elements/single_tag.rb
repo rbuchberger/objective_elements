@@ -51,6 +51,18 @@ class SingleTag
   end
   alias delete_attribute delete_attributes
 
+  def rewrite_attribute(new)
+    formatted_new = if new.is_a? String
+                      hashify_attributes(new)
+                    else
+                      new.transform_keys(&:to_sym)
+                    end
+
+    delete_attributes formatted_new.keys
+
+    add_hash_attributes formatted_new
+  end
+
   # Turns attributes into a string we can insert.
   def render_attributes
     attribute_string = ''
@@ -78,18 +90,6 @@ class SingleTag
   # Renders our HTML.
   def to_s
     opening_tag + "\n"
-  end
-
-  def rewrite_attribute(new)
-    formatted_new = if new.is_a? String
-                      hashify_attributes(new)
-                    else
-                      new.transform_keys(&:to_sym)
-                    end
-
-    delete_attributes formatted_new.keys
-
-    add_hash_attributes formatted_new
   end
 
   private
