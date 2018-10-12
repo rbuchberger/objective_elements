@@ -47,16 +47,36 @@ RSpec.describe SingleTag do
       expect(@t.attributes[:class]).to eql(%w[stumpy wiley])
     end
 
-    it 'resets attributes' do
+    it 'resets all attributes' do
       @t.reset_attributes
 
       expect(@t.attributes).to eql({})
     end
 
-    it 'rewrites attributes' do
+    it 'adds new attributes after reset' do
       @t.reset_attributes(class: 'mopey')
 
       expect(@t.attributes).to eql(class: ['mopey'])
+    end
+
+    it 'replaces single attributes' do
+      @t.rewrite_attribute class: 'new hotness'
+
+      expect(@t.attributes).to eql(
+        class: %w[new hotness], src: ['angry-baby.jpg']
+      )
+    end
+
+    it 'deletes a single string attribute' do
+      @t.delete_attribute 'class'
+
+      expect(@t.attributes).to eql(src: ['angry-baby.jpg'])
+    end
+
+    it 'deletes array attributes' do
+      @t.delete_attributes %i[class src]
+
+      expect(@t.attributes).to eql({})
     end
 
     it 'adds a parent' do

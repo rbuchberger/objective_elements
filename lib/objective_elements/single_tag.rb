@@ -18,6 +18,8 @@ class SingleTag
   def reset_attributes(new = nil)
     @attributes = {}
     add_attributes(new) if new
+
+    self
   end
 
   # This is the only way we add new attributes. Flexible about what you give
@@ -30,8 +32,24 @@ class SingleTag
     else
       add_hash_attributes(new)
     end
+
+    self
   end
-  alias_method :add_attribute, :add_attributes
+  alias add_attribute add_attributes
+
+  def delete_attributes(keys)
+    # accepts an array or a single element
+    to_delete = if keys.is_a? Array
+                  keys.map(&:to_sym)
+                else
+                  [keys.to_sym]
+                end
+
+    to_delete.each { |k| @attributes.delete k }
+
+    self
+  end
+  alias delete_attribute delete_attributes
 
   # Turns attributes into a string we can insert.
   def render_attributes
@@ -62,18 +80,33 @@ class SingleTag
     opening_tag + "\n"
   end
 
+  def rewrite_attribute(new)
+    formatted_new = if new.is_a? String
+                      hashify_attributes(new)
+                    else
+                      new.transform_keys(&:to_sym)
+                    end
+
+    delete_attributes formatted_new.keys
+
+    add_hash_attributes formatted_new
+  end
+
   private
 
-  def add_string_attributes(new)
+  def add_string_attributes(new_string)
+    add_hash_attributes hashify_attributes new_string
+  end
+
+  def hashify_attributes(new_string)
     # looking for something like:
     # 'class="something something-else" id="my-id"'
     new_hash = {}
-    new.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
+    new_string.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
       # [['class','something something-else'],['id','my-id']]
       new_hash[m.shift] = m.pop
     end
-
-    add_hash_attributes(new_hash)
+    new_hash
   end
 
   def add_hash_attributes(new)
@@ -88,5 +121,4 @@ class SingleTag
     end
     self
   end
-
 end
