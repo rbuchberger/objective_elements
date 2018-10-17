@@ -26,6 +26,13 @@ RSpec.describe SingleTag do
 
       expect(@t.attributes).to eql(class: ['stumpy'])
     end
+
+    it "doesn't break when nil attributes are added" do
+      @t.add_attributes nil
+
+      expect(@t.attributes).to eql({})
+      expect(@t.to_s).to eql("<hr>\n")
+    end
   end
 
   context 'tag with attributes' do

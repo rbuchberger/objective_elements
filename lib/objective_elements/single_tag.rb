@@ -27,6 +27,9 @@ class SingleTag
   # arrays for the values.
 
   def add_attributes(new)
+    # Don't break everything if this is passed an empty value:
+    return self unless new
+
     if new.is_a? String
       add_string_attributes(new)
     else
