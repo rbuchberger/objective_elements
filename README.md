@@ -1,14 +1,20 @@
 # Objective Elements
 
-This is a tiny gem that builds nicely formatted HTML using sane, readable Ruby. I use it for jekyll
-plugins, but you can use it anywhere. It's ~100 lines, tested with rspec, and has no dependencies.
+This is a tiny gem that builds nicely formatted HTML using sane, readable Ruby. I use it for Jekyll
+plugins, but you can use it anywhere. It's ~100 lines, tested with RSpec, and has no dependencies.
 
 It doesn't actually know any HTML, just how to format it.
 
 This is meant to be less involved and more flexible than nokogiri's XML/HTML generator. There's no
-DSL to learn, and no cleverness to wrap your mind around. Its specialty is taking fragmented,
+DSL to learn and no cleverness to wrap your mind around. Its specialty is taking fragmented,
 disjointed information and condensing it into a string of properly formatted HTML. It's as agnostic
 as possible on the input, while being extremely consistent with its output.
+
+## Changes
+
+### 1.0.0
+Attributes syntax has changed pretty significantly. Find `.add_attributes` & replace `.attributes << `
+will get you most of the way there, but you should read over the usage section of this readme again.
 
 ## How it works:
 
@@ -74,11 +80,11 @@ p.attributes << { class: 'stumpy grumpy', 'id' => 'the-ugly-one' }
 # Add attributes as a string!
 p.attributes << 'class="slimy" data-awesomeness="11"'
 
-# Get attributes by calling a method!
+# Get attributes by calling a method! (Note: This doesn't work for class or method)
 p.data-awesomeness 
 # '11'
 
-# Set them, too! (Note: This doesn't work for class or method)
+# Set them, too!
 p.id = 'killer'
 
 # Add content. It can be anything, or an array of anythings.
@@ -126,7 +132,7 @@ to [jekyll-picture-tag](https://github.com/robwierzbowski/jekyll-picture-tag).
  ```ruby
  # Gemfile
  
- gem 'objective_elements', '~> 0.2.0'
+ gem 'objective_elements', '~> 1.0.0'
  ```
  
  ```ruby
@@ -167,20 +173,20 @@ means that any time you are adding attributes, you can use any format which this
 `.delete(attribute)` - Delete one or more attributes. Accepts a string, symbol, or an array of
 strings and/or symbols.
 
-`.replace(attribute)` - Replaces one or more attributes and values.
+`.replace(attribute)` - Replaces one or more attributes and values individually.
+
+`.content[:attribute_name] = ` - Don't do it. Use `.replace`, `.(attribute name) = `, or `<<` 
 
 `.content[:attribute_name]` - Retrieve the content for a given attribute, as an array of strings.
 Must be a symbol. You'll mostly need this when you don't know which attribute you need ahead of ti
 me, or to access class and method attributes because you can't use the methods below:
 
-`.content[:attribute_name] = ` - Don't do it. Use `<<` or `.replace`.
-
-`.(attribute_name)` - Convenience method/syntactic sugar: Returns the value of a given attribute
+`.(attribute_name)` - (example: `.srcset`) Convenience method/syntactic sugar: Returns the value of a given attribute
 name, as a space-separated string. This relies on method_missing, which means that any overlap with
 already existing methods won't work.  **You can't access `class` or `method` html attributes this
 way, because basic objects in ruby already have those methods.**
 
-`.(attribute_name) = value` - Same as above. Equivalent to `.replace(attribute)`. Interestingly,
+`.(attribute_name) = value` - Same as above. Similar to `.replace(attribute)`. Interestingly,
 `method = ` and `class = ` both work (`.class` is defined on the basic object class, but `.class=`
 is not.). That said, you probably shouldn't use them because it will be confusing to understand
 later.
@@ -206,9 +212,9 @@ later.
 `.attributes` - attr_reader for HTML attributes. This is how you can access any attribute method
 described above.
 
-`.reset_attributes` - Removes all attributes
+`.reset_attributes` - Removes all attributes.
 
-`.attributes=(attributes)` - Sets attributes to the supplied argument
+`.attributes=(new)` - Equivalent to `reset_attributes` and `.attributes << new`
 
 `attr_reader :attributes`
 `attr_accessor :element`
