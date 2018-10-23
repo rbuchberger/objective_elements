@@ -2,6 +2,7 @@
 # Describes a basic, self-closing HTML tag.
 class SingleTag
   attr_accessor :element
+  attr_reader :attributes
 
   # element is a string, such as 'div' or 'p'.
 
@@ -13,78 +14,18 @@ class SingleTag
     self.attributes = attributes
   end
 
-  # Turns attributes into a string we can insert.
-  def attributes
-    attribute_string = ''
-    @attributes.each_pair do |k, v|
-      attribute_string << "#{k}=\"#{v.join ' '}\" "
-    end
-    attribute_string.strip
+  def attributes=(new)
+    @attributes = HTMLAttributes.new(new)
   end
 
   # Deletes all current attributes, overwrites them with supplied hash.
-  def attributes=(new)
-    reset_attributes
-    add_attributes(new)
-  end
-
   def reset_attributes
-    @attributes = {}
+    @attributes = HTMLAttributes.new
   end
-
-  # This is the only way we add new attributes. Flexible about what you give
-  # it-- accepts both strings and symbols for the keys, and both strings and
-  # arrays for the values.
-  def add_attributes(new)
-    # Don't break everything if this is passed an empty value:
-    return self unless new
-
-    if new.is_a? String
-      add_string_attributes(new)
-    else
-      add_hash_attributes(new)
-    end
-
-    self
-  end
-  alias add_attribute add_attributes
-
-  def delete_attributes(keys)
-    # accepts an array or a single element
-    to_delete = if keys.is_a? Array
-                  keys.map(&:to_sym)
-                else
-                  [keys.to_sym]
-                end
-
-    to_delete.each { |k| @attributes.delete k }
-
-    self
-  end
-  alias delete_attribute delete_attributes
-
-  def replace_attributes(new)
-    formatted_new = if new.is_a? String
-                      hashify_attributes(new)
-                    else
-                      new.transform_keys(&:to_sym)
-                    end
-
-    delete_attributes formatted_new.keys
-
-    add_hash_attributes formatted_new
-  end
-  alias replace_attribute replace_attributes
 
   # Returns parent, with self added as a child
   def add_parent(parent)
     parent.add_content(self)
-  end
-
-  def opening_tag
-    output =  '<' + @element
-    output << ' ' + attributes unless @attributes.empty?
-    output << '>'
   end
 
   def to_a
@@ -98,31 +39,9 @@ class SingleTag
 
   private
 
-  def add_string_attributes(new_string)
-    add_hash_attributes hashify_attributes new_string
-  end
-
-  def hashify_attributes(new_string)
-    # looking for something like:
-    # 'class="something something-else" id="my-id"'
-    new_hash = {}
-    new_string.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
-      # [['class','something something-else'],['id','my-id']]
-      new_hash[m.shift] = m.pop
-    end
-    new_hash
-  end
-
-  def add_hash_attributes(new)
-    formatted_new = {}
-    new.each_pair do |k, v|
-      v = v.split ' ' if v.is_a? String
-      formatted_new[k.to_sym] = v
-    end
-
-    @attributes.merge! formatted_new do |_key, oldval, newval|
-      oldval.concat newval
-    end
-    self
+  def opening_tag
+    output =  '<' + @element
+    output << ' ' + @attributes.to_s unless @attributes.empty?
+    output << '>'
   end
 end

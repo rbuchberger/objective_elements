@@ -1,0 +1,59 @@
+require 'objective_elements'
+RSpec.describe HTMLAttributes do
+  context 'single attribute' do
+    before(:each) do
+      @t = described_class.new 'class="stumpy"'
+    end
+
+    it 'adds string attributes' do
+      @t << 'class="killer"'
+
+      expect(@t.to_s).to eql('class="stumpy killer"')
+    end
+
+    it 'adds hash with string attributes' do
+      @t << { id: 'killer' }
+
+      expect(@t.to_s).to eql('class="stumpy" id="killer"')
+    end
+
+    it 'adds hash with array attributes' do
+      @t << { class: ['killer'] }
+      expect(@t.to_s).to eql('class="stumpy killer"')
+    end
+
+    it "doesn't break when nil attributes are added" do
+      @t << nil
+
+      expect(@t.to_s).to eql('class="stumpy"')
+    end
+  end
+
+  context 'multiple attributes' do
+    before(:each) do
+      @t = described_class.new(
+        src: 'angry-baby.jpg', class: 'stumpy'
+      )
+    end
+
+    it 'replaces single attributes' do
+      @t.replace class: 'new hotness'
+
+      expect(@t.to_s).to eql(
+        'src="angry-baby.jpg" class="new hotness"'
+      )
+    end
+
+    it 'deletes a single string attribute' do
+      @t.delete 'class'
+
+      expect(@t.to_s).to eql('src="angry-baby.jpg"')
+    end
+
+    it 'deletes array attributes' do
+      @t.delete %i[class src]
+
+      expect(@t.to_s).to eql('')
+    end
+  end
+end

@@ -8,31 +8,6 @@ RSpec.describe SingleTag do
     it 'creates a basic element' do
       expect(@t.to_s).to eql("<hr>\n")
     end
-
-    it 'adds string attributes' do
-      @t.add_attributes 'class="stumpy"'
-
-      expect(@t.attributes).to eql('class="stumpy"')
-    end
-
-    it 'adds hash with string attributes' do
-      @t.add_attributes class: 'stumpy'
-
-      expect(@t.attributes).to eql('class="stumpy"')
-    end
-
-    it 'adds hash with array attributes' do
-      @t.add_attributes class: ['stumpy']
-
-      expect(@t.attributes).to eql('class="stumpy"')
-    end
-
-    it "doesn't break when nil attributes are added" do
-      @t.add_attributes nil
-
-      expect(@t.attributes).to eql('')
-      expect(@t.to_s).to eql("<hr>\n")
-    end
   end
 
   context 'tag with attributes' do
@@ -45,47 +20,19 @@ RSpec.describe SingleTag do
     it 'inits a tag with attributes' do
       t = described_class.new 'hr', attributes: { class: 'stumpy' }
 
-      expect(t.attributes).to eql('class="stumpy"')
-    end
-
-    it 'appends values to existing attributes' do
-      @t.add_attributes class: 'wiley'
-
-      expect(@t.attributes).to eql(
-        'src="angry-baby.jpg" class="stumpy wiley"'
-      )
+      expect(t.to_s).to eql("<hr class=\"stumpy\">\n")
     end
 
     it 'resets all attributes' do
       @t.reset_attributes
 
-      expect(@t.attributes).to eql('')
+      expect(@t.to_s).to eql("<img>\n")
     end
 
-    it 'adds new attributes after reset' do
+    it 'sets attributes with =' do
       @t.attributes = { class: 'mopey' }
 
-      expect(@t.attributes).to eql('class="mopey"')
-    end
-
-    it 'replaces single attributes' do
-      @t.replace_attributes class: 'new hotness'
-
-      expect(@t.attributes).to eql(
-        'src="angry-baby.jpg" class="new hotness"'
-      )
-    end
-
-    it 'deletes a single string attribute' do
-      @t.delete_attribute 'class'
-
-      expect(@t.attributes).to eql('src="angry-baby.jpg"')
-    end
-
-    it 'deletes array attributes' do
-      @t.delete_attributes %i[class src]
-
-      expect(@t.attributes).to eql('')
+      expect(@t.attributes.to_s).to eql('class="mopey"')
     end
 
     it 'adds a parent' do
@@ -99,21 +46,21 @@ RSpec.describe SingleTag do
     end
 
     it 'renders complex tag' do
-      @t.add_attributes class: 'wiley mopey', id: 'frumpy'
+      @t.attributes << { class: 'wiley mopey', id: 'frumpy' }
 
       expect(@t.to_s).to eql(
-        "<img src=\"angry-baby.jpg\" class=\"stumpy wiley mopey\" id=\"frumpy\">\n"
+        '<img src="angry-baby.jpg" '\
+        "class=\"stumpy wiley mopey\" id=\"frumpy\">\n"
       )
     end
+  end
+  # Ensure things aren't persisting that shouldn't.
+  it 'renders consistently' do
+    t = described_class.new 'img', attributes: { src: 'angry-baby.jpg' }
+    t.attributes << { class: 'stumpy mopey', id: 'frumpy' }
+    initial = t.to_s
+    10.times { t.to_s }
 
-    # Ensure things aren't persisting that shouldn't.
-    it 'renders consistently' do
-      t = described_class.new 'img', attributes: { src: 'angry-baby.jpg' }
-      t.add_attributes class: 'stumpy mopey', id: 'frumpy'
-      initial = t.to_s
-      10.times { t.to_s }
-
-      expect(t.to_s).to eql(initial)
-    end
+    expect(t.to_s).to eql(initial)
   end
 end
