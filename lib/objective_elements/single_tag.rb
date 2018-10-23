@@ -1,7 +1,6 @@
 # Collection of HTML element tags
 # Describes a basic, self-closing HTML tag.
 class SingleTag
-  attr_reader :attributes
   attr_accessor :element
 
   # element is a string, such as 'div' or 'p'.
@@ -11,21 +10,31 @@ class SingleTag
 
   def initialize(element, attributes: nil)
     @element = element
-    reset_attributes(attributes)
+    self.attributes = attributes
+  end
+
+  # Turns attributes into a string we can insert.
+  def attributes
+    attribute_string = ''
+    @attributes.each_pair do |k, v|
+      attribute_string << "#{k}=\"#{v.join ' '}\" "
+    end
+    attribute_string.strip
   end
 
   # Deletes all current attributes, overwrites them with supplied hash.
-  def reset_attributes(new = nil)
-    @attributes = {}
-    add_attributes(new) if new
+  def attributes=(new)
+    reset_attributes
+    add_attributes(new)
+  end
 
-    self
+  def reset_attributes
+    @attributes = {}
   end
 
   # This is the only way we add new attributes. Flexible about what you give
   # it-- accepts both strings and symbols for the keys, and both strings and
   # arrays for the values.
-
   def add_attributes(new)
     # Don't break everything if this is passed an empty value:
     return self unless new
@@ -54,7 +63,7 @@ class SingleTag
   end
   alias delete_attribute delete_attributes
 
-  def rewrite_attribute(new)
+  def replace_attributes(new)
     formatted_new = if new.is_a? String
                       hashify_attributes(new)
                     else
@@ -65,15 +74,7 @@ class SingleTag
 
     add_hash_attributes formatted_new
   end
-
-  # Turns attributes into a string we can insert.
-  def render_attributes
-    attribute_string = ''
-    @attributes.each_pair do |k, v|
-      attribute_string << "#{k}=\"#{v.join ' '}\" "
-    end
-    attribute_string.strip
-  end
+  alias replace_attribute replace_attributes
 
   # Returns parent, with self added as a child
   def add_parent(parent)
@@ -82,7 +83,7 @@ class SingleTag
 
   def opening_tag
     output =  '<' + @element
-    output << ' ' + render_attributes unless @attributes.empty?
+    output << ' ' + attributes unless @attributes.empty?
     output << '>'
   end
 
