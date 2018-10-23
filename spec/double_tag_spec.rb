@@ -29,7 +29,7 @@ RSpec.describe DoubleTag do
     end
 
     it 'adds content as an array' do
-      @t.add_content %w[hello laddy]
+      @t <<  %w[hello laddy]
 
       expect(@t.content).to eql(%w[hello laddy])
     end
@@ -79,7 +79,7 @@ RSpec.describe DoubleTag do
     end
 
     it 'overwrites content' do
-      @t.reset_content('new text')
+      @t.content = 'new text'
 
       expect(@t.content).to eql(['new text'])
     end

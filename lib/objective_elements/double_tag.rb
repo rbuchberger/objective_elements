@@ -1,49 +1,53 @@
 # Non-Self-Closing tag. Can have content, but doesn't have to.
 class DoubleTag < SingleTag
-  attr_accessor :content, :oneline
-  # content is an array of anything. Entries will be inserted sequentially in
-  # between the opening and closing tags.
+  attr_accessor :oneline
+  attr_reader :content
 
-  def initialize(element, attributes: nil, content: [], oneline: false)
+  # Content represents everything between the opening and closing tags.
+
+  def initialize(element, attributes: nil, content: nil, oneline: false)
     @oneline = oneline
-    reset_content(content)
+    self.content = content
     super(element, attributes: attributes)
   end
 
-  def closing_tag
-    "</#{element}>"
+  def content=(new)
+    reset_content
+    add_content(new)
   end
 
-  # Deletes all content, replaces with parameter (if supplied)
-  def reset_content(new = nil)
+  def reset_content
     @content = []
-    add_content(new) if new
-    self
   end
 
   def add_content(addition)
-    @content << addition
+    @content << addition if addition
     @content.flatten!
     self
   end
-
-  def indent
-    "\ \ "
-  end
+  alias << add_content
 
   def to_a
-    lines = content.map do |c|
-      if c.is_a? SingleTag
-        c.to_a
-      else
-        c.to_s.dup
-      end
-    end
+    lines = content.map { |c| build_content_line c }
     lines = lines.flatten.map { |l| l.prepend oneline ? '' : indent }
     lines.unshift(opening_tag).push(closing_tag)
   end
 
   def to_s
     to_a.join(oneline ? '' : "\n") + "\n"
+  end
+
+  private
+
+  def build_content_line(element)
+    element.is_a?(SingleTag) ? element.to_a : element.to_s.dup
+  end
+
+  def indent
+    "\ \ "
+  end
+
+  def closing_tag
+    "</#{element}>"
   end
 end
