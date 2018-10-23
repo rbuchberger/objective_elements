@@ -37,6 +37,19 @@ class SingleTag
     opening_tag + "\n"
   end
 
+  # Allows us to work with attributes as methods:
+  def method_missing(method, arg = nil)
+    if @attributes.respond_to?(method)
+      @attributes.send(method, arg)
+    else
+      super
+    end
+  end
+
+  def respond_to_missing?(method, include_private = false)
+    @attributes.respond_to?(method) || super
+  end
+
   private
 
   def opening_tag
