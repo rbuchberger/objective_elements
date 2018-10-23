@@ -156,40 +156,66 @@ So we're on the same page, here's the terminology I'm using:
 
 ## Usage
 
+For Attribute & SingleTag examples, assume we have the following image tag created:
+```ruby
+
+img = SingleTag.new 'img', attributes: 'src="angry-baby.jpg"'
+
+```
+
 There are 2 classes you care about: `SingleTag` is the base class, and `DoubleTag` inherits from it.
 A `SingleTag` is a self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is
 the other kind.
 
 ### Attributes
 Attributes are their own class, and can be accessed by the `.attributes` method on both single and
-double tags. Important methods: 
+double tags. Important methods:
 
-` << (attribute)` - Add new attributes, can accept a hash or a string. Hash keys will be converted
+
+
+` << (attribute)` 
+- Example: `p.attributes << 'alt="he does not look happy"'`
+- Example: `p.attributes << { alt: "he does not look happy" }`
+- Add new attributes, can accept a hash or a string. Hash keys will be converted
 to symbols if they are not already, and values will be split on spaces into an array if they are not
 already. Attributes can also be given as a string in the standard HTML syntax (`class="myclass"
 id="my-id"`).  **Every other method which adds attributes in some way, calls this method**. This
 means that any time you are adding attributes, you can use any format which this method understands.
  
-`.delete(attribute)` - Delete one or more attributes. Accepts a string, symbol, or an array of
+`.delete(attribute)` 
+- Example: `img.attributes.delete 'src'`
+- Example: `img.attributes.delete :src`
+- Example: `img.attributes.delete [:src, 'alt']`
+- Delete one or more attributes. Accepts a string, symbol, or an array of
 strings and/or symbols.
 
-`.replace(attribute)` - Replaces one or more attributes and values individually.
+`.replace(attribute)` 
+- Example: `img.attributes.replace 'src="happy-baby.jpg"'`
+- Replaces one or more attributes and values individually.
 
-`.content[:attribute_name] = ` - Don't do it. Use `.replace`, `.(attribute name) = `, or `<<` 
+`.content[:attribute_name] = ` 
+- Example: `img.attributes.content[:src] = 'dirty-baby.jpg'` < This just broke everything.
+- Don't do it. Use `.replace`, `.(attribute name) = `, or `<<` 
 
-`.content[:attribute_name]` - Retrieve the content for a given attribute, as an array of strings.
-Must be a symbol. You'll mostly need this when you don't know which attribute you need ahead of ti
-me, or to access class and method attributes because you can't use the methods below:
+`.content[:attribute_name]` 
+- Example: `img.attributes[:src]`
+- Retrieve the content for a given attribute, as an array of strings. Must be a symbol. You'll
+- mostly need this when you don't know which attribute you need ahead of
+  time, or to access class and method attributes because you can't use the methods below:
 
-`.(attribute_name)` - (example: `.srcset`) Convenience method/syntactic sugar: Returns the value of a given attribute
-name, as a space-separated string. This relies on method_missing, which means that any overlap with
-already existing methods won't work.  **You can't access `class` or `method` html attributes this
-way, because basic objects in ruby already have those methods.**
+** Note that for the next two methods, there's a shorthand described below.**
+`.(attribute_name)` 
+- Example: `img.attributes.src # 'angry-baby.jpg'`
+- Convenience method/syntactic sugar: Returns the value of a given attribute name, as a
+- space-separated string. This relies on method_missing, which means that any overlap with
+  already existing methods won't work.  **You can't access `class` or `method` html attributes this
+  way, because basic objects in ruby already have those methods.**
 
-`.(attribute_name) = value` - Same as above. Similar to `.replace(attribute)`. Interestingly,
-`method = ` and `class = ` both work (`.class` is defined on the basic object class, but `.class=`
-is not.). That said, you probably shouldn't use them because it will be confusing to understand
-later.
+`.(attribute_name) = value` 
+- Example: `img.attributes.src = 'happy-baby.jpg'`
+- Same as above. Similar to `.replace(attribute)`. Interestingly, `method = ` and `class = ` both
+  work (`.class` is defined on the basic object class, but `.class=` is not.). That said, you
+  probably shouldn't use them because it will be confusing to understand later.
 
 ### SingleTag Properties:
 
@@ -200,30 +226,51 @@ later.
  #### attributes
  - Instance of the class described above.
 
-
 ### SingleTag Methods (that you care about)
 
 `SingleTag.new(element, attributes: nil)`
 
-`.to_s` - The big one. Returns your HTML as a string, nondestructively.
+`.to_s` 
+- Example: `img.to_s`
+- The big one. Returns your HTML as a string, nondestructively.
 
-`.add_parent(DoubleTag)` - returns supplied DoubleTag, with self added as a child.
+`.add_parent(DoubleTag)` 
+- Example: `img.add_parent DoubleTag.new 'picture'`
+- returns supplied DoubleTag, with self added as a child.
 
-`.attributes` - attr_reader for HTML attributes. This is how you can access any attribute method
+`.attributes` 
+- Example: `img.attributes`
+- attr_reader for HTML attributes. This is how you can access any attribute method
 described above.
 
-`.reset_attributes` - Removes all attributes.
+`.reset_attributes` 
+- Example: `img.reset_attributes`
+- Removes all attributes.
 
-`.attributes=(new)` - Equivalent to `reset_attributes` and `.attributes << new`
+`.attributes=(new)` 
+- Example: `img.attributes = 'src="grumpy-baby.jpg" id="muddy"'`
+- Equivalent to `reset_attributes` and `.attributes << new`
 
 `attr_reader :attributes`
 `attr_accessor :element`
 
-`.(attribute_name)` / `.(attribute_name) = ` - Forwarded to attributes object. Allows you to set or
-retrieve the value of attributes other than `class` and `method`, without having to type
-`.attributes` in front of it.
+**Here's the shorthand I mentioned earlier:**
+
+`.(attribute_name)` / `.(attribute_name) = ` 
+- Example: `img.src # returns 'angry-baby.jpg'`
+- Example: `img.src = 'grumpy-baby.jpg'`
+- Forwarded to attributes object. Allows you to set or retrieve the value of attributes other than
+  `class` and `method`, without having to type `.attributes` in front of it.
 
 ### DoubleTag Properties:
+
+For DoubleTag Examples, we're working with a div tag: 
+
+```
+
+div = DoubleTag.new 'div'
+
+```
 
 #### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, and adds content and a
 closing tag.
@@ -248,13 +295,17 @@ closing tag.
 
 ### DoubleTag Methods (that you care about)
 
-`DoubleTag.new(element, attributes: {}, oneline: false, content: [])` - You can initialize it with
-content.
+`DoubleTag.new(element, attributes: {}, oneline: false, content: [])` 
+- You can initialize it with content.
 
-`add_content(anything)` - Smart enough to handle both arrays and not-arrays without getting dorked
-up. When given an array, its elements will be appended to the content array. When given a single
-item, that item will be inserted at the end of the array. (Remember each element in the content
-array gets at least one line!)
+`add_content(anything)` 
+- Example: `div.add_content 'example text!'`
+- Example: `div.add_content ['splits', 'across', 'lines']`
+- Example: `div.add_content img # image tag from earlier`
+- Smart enough to handle both arrays and not-arrays without getting dorked up. When given an array,
+  its elements will be appended to the content array. When given a single item, that item will be
+  inserted at the end of the array. (Remember each element in the content array gets at least one
+  line!)
 
 `attr_accessor: content` - You can modify the content array directly if you like. If you're just
 adding items, you should use `.add_content`
