@@ -10,20 +10,6 @@ DSL to learn and no cleverness to wrap your mind around. Its specialty is taking
 disjointed information and condensing it into a string of properly formatted HTML. It's as agnostic
 as possible on the input, while being extremely consistent with its output.
 
-## Changes
-
-### 1.0.0
-Attributes syntax has changed pretty significantly. Find `.add_attributes` & replace `.attributes << `
-will get you most of the way there, but you should read over the usage section of this readme again.
-
-## How it works:
-
-* Instantiate a `SingleTag` or `DoubleTag`
-
-* Add attributes & content. Nest tags infinitely.
-
-* Render it with `.to_s`
-
 ## Motivation:
 
 Have you ever tried to build HTML with string concatenation and interpolation? It starts out simply
@@ -57,37 +43,23 @@ or this:
     end
 ```
 
-Which is why I sat down and wrote this gem. It's super simple, you probably could have written it
-too, but hey! Now you don't have to. Here's a demo:
-
 ## Demo
 
 ```ruby
-# gemfile:
-gem 'objective_elements',  '~>1.0.0'
-
-# Anywhyere else:
-require 'objective_elements'
-
 p = DoubleTag.new 'p'
 p.to_s
 # <p>
 # </p>
 
-# Add attributes as a hash. keys can be strings or symbols, values can be arrays or strings:
 p.attributes << { class: 'stumpy grumpy', 'id' => 'the-ugly-one' }
 
-# Add attributes as a string!
 p.attributes << 'class="slimy" data-awesomeness="11"'
 
-# Get attributes by calling a method! (Note: This doesn't work for class or method)
 p.data-awesomeness 
 # '11'
 
-# Set them, too!
 p.id = 'killer'
 
-# Add content. It can be anything, or an array of anythings.
 p.add_content "Icky"
 
 p.to_s
@@ -95,24 +67,20 @@ p.to_s
 #   Icky
 # </p>
 
-# Want a oneliner?
 p.oneline = true
 p.to_s
 # <p class="stumpy grumpy slimy" id="killer" data-awesomeness="11">Icky</p>
 p.oneline = false
 
-# Build a tag all at once:
 p.add_content DoubleTag.new(
   'a',
   content: 'Link!',
-  attributes: {href: 'awesome-possum.com'},
+  attributes: { href: 'awesome-possum.com' },
   oneline: true
 )
 
-# Add a parent tag:
 div = p.add_parent DoubleTag.new 'div'
 
-# Implicit string conversion means cool stuff like this works:
 "#{div}"
 # <div>
 #   <p class="stumpy grumpy slimy" id="killer" data-awesomeness="11">
@@ -123,9 +91,11 @@ div = p.add_parent DoubleTag.new 'div'
 
 ```
 
-For complete example usage, see [jekyll_icon_list](https://github.com/rbuchberger/jekyll_icon_list), or
-this [pull request](https://github.com/robwierzbowski/jekyll-picture-tag/pull/87/commits/d6b2deca0f19f173251a2984037e5e5f8d7c21d1)
-to [jekyll-picture-tag](https://github.com/robwierzbowski/jekyll-picture-tag).
+## Changes
+
+### 1.0.0
+Attributes syntax has changed pretty significantly. Find `.add_attributes` & replace `.attributes << `
+will get you most of the way there, but you should read over the usage section again.
 
 ## Installation
 
@@ -136,13 +106,13 @@ to [jekyll-picture-tag](https://github.com/robwierzbowski/jekyll-picture-tag).
  ```
  
  ```ruby
- # Wherever you need to use it:
+ # Anywhere else:
  
  require 'objective_elements'
  ```
+ 
 ## Terminology
 
-So we're on the same page, here's the terminology I'm using:
 ```
 <p class="stumpy">Hello</p>
 |a|       b      |  c  | d |
@@ -156,7 +126,7 @@ So we're on the same page, here's the terminology I'm using:
 
 ## Usage
 
-For Attribute & SingleTag examples, assume we have the following image tag created:
+For Attribute & SingleTag examples, we'll use this image tag:
 ```ruby
 
 img = SingleTag.new 'img', attributes: 'src="angry-baby.jpg"'
@@ -198,12 +168,13 @@ strings and/or symbols.
 - Don't do it. Use `.replace`, `.(attribute name) = `, or `<<` 
 
 `.content[:attribute_name]` 
-- Example: `img.attributes[:src]`
+- Example: `img.attributes[:src] # returns 'angry-baby.jpg`
 - Retrieve the content for a given attribute, as an array of strings. Must be a symbol. You'll
 - mostly need this when you don't know which attribute you need ahead of
   time, or to access class and method attributes because you can't use the methods below:
 
-** Note that for the next two methods, there's a shorthand described below.**
+**There is a shorthand for the next two methods. Keep reading.**
+
 `.(attribute_name)` 
 - Example: `img.attributes.src # 'angry-baby.jpg'`
 - Convenience method/syntactic sugar: Returns the value of a given attribute name, as a
@@ -214,15 +185,21 @@ strings and/or symbols.
 `.(attribute_name) = value` 
 - Example: `img.attributes.src = 'happy-baby.jpg'`
 - Same as above. Similar to `.replace(attribute)`. Interestingly, `method = ` and `class = ` both
-  work (`.class` is defined on the basic object class, but `.class=` is not.). That said, you
-  probably shouldn't use them because it will be confusing to understand later.
+  work (`.class` is defined on the basic object class, but `.class=` is not.). Still, you
+  probably shouldn't use them.
+
+**Missing methods are forwarded from elements to their attributes, so you can do this:**
+
+- Example: `img.src # returns 'angry-baby.jpg'`
+- Example: `img.src = 'grumpy-baby.jpg'`
 
 ### SingleTag Properties:
 
  #### element
  - String
  - Mandatory
- - Which type of tag it is, such as 'hr' or 'img'
+ - Which type of tag, such as 'hr' or 'img'
+ 
  #### attributes
  - Instance of the class described above.
 
@@ -254,23 +231,8 @@ described above.
 `attr_reader :attributes`
 `attr_accessor :element`
 
-**Here's the shorthand I mentioned earlier:**
-
-`.(attribute_name)` / `.(attribute_name) = ` 
-- Example: `img.src # returns 'angry-baby.jpg'`
-- Example: `img.src = 'grumpy-baby.jpg'`
-- Forwarded to attributes object. Allows you to set or retrieve the value of attributes other than
-  `class` and `method`, without having to type `.attributes` in front of it.
-
 ### DoubleTag Properties:
 
-For DoubleTag Examples, we're working with a div tag: 
-
-```
-
-div = DoubleTag.new 'div'
-
-```
 
 #### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, and adds content and a
 closing tag.
@@ -295,6 +257,12 @@ closing tag.
 
 ### DoubleTag Methods (that you care about)
 
+For DoubleTag Examples, we're working with a div tag: 
+
+```
+div = DoubleTag.new 'div'
+```
+
 `DoubleTag.new(element, attributes: {}, oneline: false, content: [])` 
 - You can initialize it with content.
 
@@ -310,12 +278,14 @@ closing tag.
 `attr_accessor: content` - You can modify the content array directly if you like. If you're just
 adding items, you should use `.add_content`
 
+`oneline` - Example: `div.oneline = true`
+
 `.to_a` - Mostly used internally, but if you want an array of strings, each element a line with
 appropriate indentation applied, this is how you can get it.
 
 ## Configuration
  
- Indentation is defined by the `indent` method on the DoubleTag class, which is two markdown-escaped
+ Indentation is defined by the `indent` method on the DoubleTag class, which is two escaped
  spaces by default ("\ \ "). If you'd like to change it:
 
  1. Make a new class, inherit from DoubleTag.
