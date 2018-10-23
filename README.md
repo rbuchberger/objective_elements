@@ -57,29 +57,42 @@ too, but hey! Now you don't have to. Here's a demo:
 ## Demo
 
 ```ruby
+# gemfile:
+gem 'objective_elements',  '~>1.0.0'
+
+# Anywhyere else:
+require 'objective_elements'
+
 p = DoubleTag.new 'p'
 p.to_s
 # <p>
 # </p>
 
 # Add attributes as a hash. keys can be strings or symbols, values can be arrays or strings:
-p.add_attributes class: 'stumpy grumpy', 'id' => 'the-ugly-one'
+p.attributes << { class: 'stumpy grumpy', 'id' => 'the-ugly-one' }
 
 # Add attributes as a string!
-p.add_attributes 'class="slimy" data-awesomeness="11"'
+p.attributes << 'class="slimy" data-awesomeness="11"'
+
+# Get attributes by calling a method!
+p.data-awesomeness 
+# '11'
+
+# Set them, too! (Note: This doesn't work for class or method)
+p.id = 'killer'
 
 # Add content. It can be anything, or an array of anythings.
 p.add_content "Icky"
 
 p.to_s
-# <p class="stumpy grumpy slimy" id="the-ugly-one" data-awesomeness="11">
+# <p class="stumpy grumpy slimy" id="killer" data-awesomeness="11">
 #   Icky
 # </p>
 
 # Want a oneliner?
 p.oneline = true
 p.to_s
-# <p class="stumpy grumpy slimy" id="the-ugly-one" data-awesomeness="11">Icky</p>
+# <p class="stumpy grumpy slimy" id="killer" data-awesomeness="11">Icky</p>
 p.oneline = false
 
 # Build a tag all at once:
@@ -93,11 +106,10 @@ p.add_content DoubleTag.new(
 # Add a parent tag:
 div = p.add_parent DoubleTag.new 'div'
 
-# Ruby implicitly calls .to_s on things when you try to perform string functions with them, so
-# this works:
+# Implicit string conversion means cool stuff like this works:
 "#{div}"
 # <div>
-#   <p class="stumpy mopey grumpy slimy" id="the-ugly-one" data-awesomeness="11">
+#   <p class="stumpy grumpy slimy" id="killer" data-awesomeness="11">
 #     Icky
 #     <a href="awesome-possum.com">Link!</a>
 #   </p>
@@ -138,9 +150,40 @@ So we're on the same page, here's the terminology I'm using:
 
 ## Usage
 
-There are 2 classes: `SingleTag` is the base class, and `DoubleTag` inherits from it. A `SingleTag`
-is a self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is the other
-kind.
+There are 2 classes you care about: `SingleTag` is the base class, and `DoubleTag` inherits from it.
+A `SingleTag` is a self-closing tag, meaning it has no content and no closing tag. A `DoubleTag` is
+the other kind.
+
+### Attributes
+Attributes are their own class, and can be accessed by the `.attributes` method on both single and
+double tags. Important methods: 
+
+` << (attribute)` - Add new attributes, can accept a hash or a string. Hash keys will be converted
+to symbols if they are not already, and values will be split on spaces into an array if they are not
+already. Attributes can also be given as a string in the standard HTML syntax (`class="myclass"
+id="my-id"`).  **Every other method which adds attributes in some way, calls this method**. This
+means that any time you are adding attributes, you can use any format which this method understands.
+ 
+`.delete(attribute)` - Delete one or more attributes. Accepts a string, symbol, or an array of
+strings and/or symbols.
+
+`.replace(attribute)` - Replaces one or more attributes and values.
+
+`.content[:attribute_name]` - Retrieve the content for a given attribute, as an array of strings.
+Must be a symbol. You'll mostly need this when you don't know which attribute you need ahead of ti
+me, or to access class and method attributes because you can't use the methods below:
+
+`.content[:attribute_name] = ` - Don't do it. Use `<<` or `.replace`.
+
+`.(attribute_name)` - Convenience method/syntactic sugar: Returns the value of a given attribute
+name, as a space-separated string. This relies on method_missing, which means that any overlap with
+already existing methods won't work.  **You can't access `class` or `method` html attributes this
+way, because basic objects in ruby already have those methods.**
+
+`.(attribute_name) = value` - Same as above. Equivalent to `.replace(attribute)`. Interestingly,
+`method = ` and `class = ` both work (`.class` is defined on the basic object class, but `.class=`
+is not.). That said, you probably shouldn't use them because it will be confusing to understand
+later.
 
 ### SingleTag Properties:
 
@@ -148,42 +191,36 @@ kind.
  - String
  - Mandatory
  - Which type of tag it is, such as 'hr' or 'img'
-     
  #### attributes
-  - Hash 
-  - Optional
-  - Keys are stored as symbols, values are stored as arrays of strings: `{class: ['stumpy', 'slimy']}`
-  - add them with `.add_attributes`, which can accept a few different formats.
+ - Instance of the class described above.
+
 
 ### SingleTag Methods (that you care about)
 
-`SingleTag.new(element, attributes: {})`
+`SingleTag.new(element, attributes: nil)`
 
 `.to_s` - The big one. Returns your HTML as a string, nondestructively.
 
-`.add_attributes(new)` - The strongly recommended way to add new attributes. Can accept a hash (keys
-can be either symbols or strings, values can be either arrays or strings), or a string in the
-standard HTML syntax (`attribute="value" attribute2="value2 value3"`). Returns self. 
-
-`.reset_attributes(new)` - Deletes all attributes, calls add_attributes on supplied argument if
-given.
-
-`.delete_attributes(keys)` - Accepts a single attribute, or an array of attributes (keys or
-strings), and deletes it.
-
-`.rewrite_attributes` - Accepts anything add_attributes understands, but replaces existing
-attributes instead of appending to them.
-
 `.add_parent(DoubleTag)` - returns supplied DoubleTag, with self added as a child.
 
+`.attributes` - attr_reader for HTML attributes. This is how you can access any attribute method
+described above.
 
+`.reset_attributes` - Removes all attributes
+
+`.attributes=(attributes)` - Sets attributes to the supplied argument
 
 `attr_reader :attributes`
 `attr_accessor :element`
 
+`.(attribute_name)` / `.(attribute_name) = ` - Forwarded to attributes object. Allows you to set or
+retrieve the value of attributes other than `class` and `method`, without having to type
+`.attributes` in front of it.
+
 ### DoubleTag Properties:
 
-#### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, and adds content and a closing tag.
+#### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, and adds content and a
+closing tag.
 
  #### content
 
@@ -232,7 +269,7 @@ appropriate indentation applied, this is how you can get it.
 
  ```ruby
  
- require 'ojbective_elements'
+ require 'objective_elements'
 
  class MyDoubleTag < DoubleTag
   def indent
@@ -257,27 +294,31 @@ MyDoubleTag.new('p', content: 'hello').to_s
 
     ```html
 
+    <p>
       Here is some
       <strong>strong</strong>
       text.
+    </p>
 
     ```
     or this (default behavior):
 
     ```html
 
+    <p>
       Here is some
       <strong>
         strong
       </strong>
       text.
+    </p>
 
     ```
     But you can't do this without string interpolation or something:
 
     ```html
 
-    Here is some <strong>strong</strong> text. 
+    <p>Here is some <strong>strong</strong> text.</p>
 
     ```
     This doesn't affect how the browser will render it, but it might bug you if you're particular about
