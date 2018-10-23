@@ -42,7 +42,7 @@ class HTMLAttributes
 
   def replace(new)
     formatted_new = if new.is_a? String
-                      hashify_attributes(new)
+                      hashify_input(new)
                     else
                       new.transform_keys(&:to_sym)
                     end
@@ -56,6 +56,24 @@ class HTMLAttributes
 
   def empty?
     @content.empty?
+  end
+
+  def method_missing(method, arg = nil)
+    if method[-1] == '='
+      raise 'must supply new value' unless arg
+
+      replace(method[0..-2] => arg)
+    elsif @content.key? method
+      @content[method].join(' ')
+    else
+      super
+    end
+  end
+
+  def respond_to_missing?(method, include_private = false)
+    (method[-1] == '=') ||
+      (@content.key? method) ||
+      super
   end
 
   private
