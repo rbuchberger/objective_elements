@@ -27,6 +27,17 @@ RSpec.describe HTMLAttributes do
 
       expect(@t.to_s).to eql('class="stumpy"')
     end
+
+    it 'responds to method_missing getter' do
+      @t << 'id="killer"'
+      expect(@t.id).to eql('killer')
+    end
+
+    it 'responds to method_missing setter' do
+      @t.id = 'killer'
+
+      expect(@t.id).to eql('killer')
+    end
   end
 
   context 'multiple attributes' do
@@ -36,8 +47,16 @@ RSpec.describe HTMLAttributes do
       )
     end
 
-    it 'replaces single attributes' do
+    it 'replaces single attributes as a hash' do
       @t.replace class: 'new hotness'
+
+      expect(@t.to_s).to eql(
+        'src="angry-baby.jpg" class="new hotness"'
+      )
+    end
+
+    it 'replaces single attributes as a string' do
+      @t.replace 'class="new hotness"'
 
       expect(@t.to_s).to eql(
         'src="angry-baby.jpg" class="new hotness"'

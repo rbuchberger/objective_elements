@@ -8,6 +8,18 @@ RSpec.describe SingleTag do
     it 'creates a basic element' do
       expect(@t.to_s).to eql("<hr>\n")
     end
+
+    it 'returns array' do
+      expect(@t.to_a).to eql(['<hr>'])
+    end
+
+    it 'forwards method_missing setter' do
+      @t.id = 'killer'
+
+      expect(@t.to_s).to eql(
+        "<hr id=\"killer\">\n"
+      )
+    end
   end
 
   context 'tag with attributes' do
@@ -41,10 +53,6 @@ RSpec.describe SingleTag do
       expect(d.content).to eql([@t])
     end
 
-    it 'returns array' do
-      expect(@t.to_a).to eql(['<img src="angry-baby.jpg" class="stumpy">'])
-    end
-
     it 'renders complex tag' do
       @t.attributes << { class: 'wiley mopey', id: 'frumpy' }
 
@@ -52,6 +60,10 @@ RSpec.describe SingleTag do
         '<img src="angry-baby.jpg" '\
         "class=\"stumpy wiley mopey\" id=\"frumpy\">\n"
       )
+    end
+
+    it 'forwards method_missing getter' do
+      expect(@t.src).to eql('angry-baby.jpg')
     end
   end
   # Ensure things aren't persisting that shouldn't.
