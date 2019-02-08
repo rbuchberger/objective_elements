@@ -40,6 +40,7 @@ class DoubleTag < SingleTag
   private
 
   def build_content_line(element)
+    # Since DoubleTag inherits from SingleTag, it will slurp up those too.
     element.is_a?(SingleTag) ? element.to_a : element.to_s.dup
   end
 
