@@ -53,14 +53,19 @@ p.to_s
 
 p.attributes << { class: 'stumpy grumpy', 'id' => 'the-ugly-one' }
 
+p.id
+# the-ugly-one
+
 p.attributes << 'class="slimy" data-awesomeness="11"'
 
-p.data-awesomeness 
+
+# Ruby method names can't have dashes.
+p.attributes['data-awesomeness']
 # '11'
 
 p.id = 'killer'
 
-p.add_content "Icky"
+p << "Icky"
 
 p.to_s
 # <p class="stumpy grumpy slimy" id="killer" data-awesomeness="11">
@@ -92,6 +97,9 @@ div = p.add_parent DoubleTag.new 'div'
 ```
 
 ## Changes
+
+### 1.1.0
+Add `ShelfTag`, which is useful when you want to create siblings without a parent element.
 
 ### 1.0.0
 Attributes syntax has changed pretty significantly. Find `.add_attributes` & replace `.attributes << `
@@ -141,8 +149,6 @@ the other kind.
 Attributes are their own class, and can be accessed by the `.attributes` method on both single and
 double tags. Important methods:
 
-
-
 ` << (attribute)` 
 - Example: `p.attributes << 'alt="he does not look happy"'`
 - Example: `p.attributes << { alt: "he does not look happy" }`
@@ -179,8 +185,10 @@ strings and/or symbols.
 - Example: `img.attributes.src # 'angry-baby.jpg'`
 - Convenience method/syntactic sugar: Returns the value of a given attribute name, as a
 - space-separated string. This relies on method_missing, which means that any overlap with
-  already existing methods won't work.  **You can't access `class` or `method` html attributes this
-  way, because basic objects in ruby already have those methods.**
+  already existing methods won't work.  
+- **You can't access `class` or `method` html attributes this way, because
+  basic objects in ruby already have those methods.**
+- **Ruby methods can't have dashes in them.** This means `p.data-awesomeness` won't work.
 
 `.(attribute_name) = value` 
 - Example: `img.attributes.src = 'happy-baby.jpg'`
@@ -282,6 +290,12 @@ adding items, you should use `.add_content`
 
 `.to_a` - Mostly used internally, but if you want an array of strings, each element a line with
 appropriate indentation applied, this is how you can get it.
+
+### ShelfTags:
+
+Shelf tags are like invisible double tags. They're useful when you want to build siblings without a corresponding parent tag.
+
+Convert it into an actual tag with `.add_parent(DoubleTag)`
 
 ## Configuration
  
