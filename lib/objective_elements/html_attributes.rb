@@ -6,6 +6,10 @@ class HTMLAttributes
     self << new
   end
 
+  def [](key)
+    @content[key.to_sym]
+  end
+
   def to_s
     return_string = ''
     @content.each_pair do |k, v|
