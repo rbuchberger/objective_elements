@@ -293,7 +293,9 @@ appropriate indentation applied, this is how you can get it.
 
 ### ShelfTags:
 
-Shelf tags are like invisible double tags. They're useful when you want to build siblings without a corresponding parent tag.
+Shelf tags are like invisible double tags. Think of them like a bookshelf.
+They're useful when you want to build siblings without a corresponding parent
+tag.
 
 Convert it into an actual tag with `.add_parent(DoubleTag)`
 
