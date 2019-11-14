@@ -55,6 +55,14 @@ RSpec.describe HTMLAttributes do
       )
     end
 
+    it 'handles duplicate attribute keys' do
+      @t << 'class="new" class="hotness"'
+
+      expect(@t.to_s).to eql(
+        'src="angry-baby.jpg" class="stumpy new hotness"'
+      )
+    end
+
     it 'replaces single attributes as a string' do
       @t.replace 'class="new hotness"'
 
