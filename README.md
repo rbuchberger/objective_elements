@@ -18,7 +18,7 @@ you only need sometimes, it turns into a horrible mess.
 
 The problem, of course, is that building long, complex, varying blocks of text with string
 concatenation and interpolation is fragile, unreadable, and painful. You know this, but you're not
-going to write an entirely new class or pull in some big new dependency just for 10 lines of HTML, 
+going to write an entirely new class or pull in some big new dependency just for 10 lines of HTML,
 so instead you hammer through it and end up with code like this:
 
 ```ruby
@@ -29,7 +29,8 @@ picture_tag = "<picture>\n"\
               "#{html_attr_string}>\n"\"#{markdown_escape * 2}</picture>\n"
 ```
 
-or this: 
+or this:
+
 ```ruby
     def build_li(this_item_data, icon_location, label)
       li = "  <li#{@attributes['li']}>"
@@ -98,43 +99,50 @@ div = p.add_parent DoubleTag.new 'div'
 
 ## Changes
 
+### 1.1.1
+
+Fix bug where duplicate attribute keys would overwrite each other's values, when passed at the same time.
+
 ### 1.1.0
+
 Add `ShelfTag`, which is useful when you want to create siblings without a parent element.
 
 ### 1.0.0
-Attributes syntax has changed pretty significantly. Find `.add_attributes` & replace `.attributes << `
+
+Attributes syntax has changed pretty significantly. Find `.add_attributes` & replace `.attributes <<`
 will get you most of the way there, but you should read over the usage section again.
 
 ## Installation
 
- ```ruby
- # Gemfile
- 
- gem 'objective_elements', '~> 1.0.0'
- ```
- 
- ```ruby
- # Anywhere else:
- 
- require 'objective_elements'
- ```
- 
+```ruby
+# Gemfile
+
+gem 'objective_elements', '~> 1.0.0'
+```
+
+```ruby
+# Anywhere else:
+
+require 'objective_elements'
+```
+
 ## Terminology
 
 ```
 <p class="stumpy">Hello</p>
 |a|       b      |  c  | d |
 ```
-- a    -  element
-- b    -  attributes
-- a+b  -  opening tag
-- c    -  content
-- d    -  closing tag
 
+- a - element
+- b - attributes
+- a+b - opening tag
+- c - content
+- d - closing tag
 
 ## Usage
 
 For Attribute & SingleTag examples, we'll use this image tag:
+
 ```ruby
 
 img = SingleTag.new 'img', attributes: 'src="angry-baby.jpg"'
@@ -146,34 +154,39 @@ A `SingleTag` is a self-closing tag, meaning it has no content and no closing ta
 the other kind.
 
 ### Attributes
+
 Attributes are their own class, and can be accessed by the `.attributes` method on both single and
 double tags. Important methods:
 
-` << (attribute)` 
+`<< (attribute)`
+
 - Example: `p.attributes << 'alt="he does not look happy"'`
 - Example: `p.attributes << { alt: "he does not look happy" }`
 - Add new attributes, can accept a hash or a string. Hash keys will be converted
-to symbols if they are not already, and values will be split on spaces into an array if they are not
-already. Attributes can also be given as a string in the standard HTML syntax (`class="myclass"
-id="my-id"`).  **Every other method which adds attributes in some way, calls this method**. This
-means that any time you are adding attributes, you can use any format which this method understands.
- 
-`.delete(attribute)` 
+  to symbols if they are not already, and values will be split on spaces into an array if they are not
+  already. Attributes can also be given as a string in the standard HTML syntax (`class="myclass" id="my-id"`). **Every other method which adds attributes in some way, calls this method**. This
+  means that any time you are adding attributes, you can use any format which this method understands.
+
+`.delete(attribute)`
+
 - Example: `img.attributes.delete 'src'`
 - Example: `img.attributes.delete :src`
 - Example: `img.attributes.delete [:src, 'alt']`
 - Delete one or more attributes. Accepts a string, symbol, or an array of
-strings and/or symbols.
+  strings and/or symbols.
 
-`.replace(attribute)` 
+`.replace(attribute)`
+
 - Example: `img.attributes.replace 'src="happy-baby.jpg"'`
 - Replaces one or more attributes and values individually.
 
-`.content[:attribute_name] = ` 
-- Example: `img.attributes.content[:src] = 'dirty-baby.jpg'` < This just broke everything.
-- Don't do it. Use `.replace`, `.(attribute name) = `, or `<<` 
+`.content[:attribute_name] =`
 
-`.content[:attribute_name]` 
+- Example: `img.attributes.content[:src] = 'dirty-baby.jpg'` < This just broke everything.
+- Don't do it. Use `.replace`, `.(attribute name) =`, or `<<`
+
+`.content[:attribute_name]`
+
 - Example: `img.attributes[:src] # returns 'angry-baby.jpg`
 - Retrieve the content for a given attribute, as an array of strings. Must be a symbol. You'll
 - mostly need this when you don't know which attribute you need ahead of
@@ -181,18 +194,20 @@ strings and/or symbols.
 
 **There is a shorthand for the next two methods. Keep reading.**
 
-`.(attribute_name)` 
+`.(attribute_name)`
+
 - Example: `img.attributes.src # 'angry-baby.jpg'`
 - Convenience method/syntactic sugar: Returns the value of a given attribute name, as a
 - space-separated string. This relies on method_missing, which means that any overlap with
-  already existing methods won't work.  
+  already existing methods won't work.
 - **You can't access `class` or `method` html attributes this way, because
   basic objects in ruby already have those methods.**
 - **Ruby methods can't have dashes in them.** This means `p.data-awesomeness` won't work.
 
-`.(attribute_name) = value` 
+`.(attribute_name) = value`
+
 - Example: `img.attributes.src = 'happy-baby.jpg'`
-- Same as above. Similar to `.replace(attribute)`. Interestingly, `method = ` and `class = ` both
+- Same as above. Similar to `.replace(attribute)`. Interestingly, `method =` and `class =` both
   work (`.class` is defined on the basic object class, but `.class=` is not.). Still, you
   probably shouldn't use them.
 
@@ -203,36 +218,43 @@ strings and/or symbols.
 
 ### SingleTag Properties:
 
- #### element
- - String
- - Mandatory
- - Which type of tag, such as 'hr' or 'img'
- 
- #### attributes
- - Instance of the class described above.
+#### element
+
+- String
+- Mandatory
+- Which type of tag, such as 'hr' or 'img'
+
+#### attributes
+
+- Instance of the class described above.
 
 ### SingleTag Methods (that you care about)
 
 `SingleTag.new(element, attributes: nil)`
 
-`.to_s` 
+`.to_s`
+
 - Example: `img.to_s`
 - The big one. Returns your HTML as a string, nondestructively.
 
-`.add_parent(DoubleTag)` 
+`.add_parent(DoubleTag)`
+
 - Example: `img.add_parent DoubleTag.new 'picture'`
 - returns supplied DoubleTag, with self added as a child.
 
-`.attributes` 
+`.attributes`
+
 - Example: `img.attributes`
 - attr_reader for HTML attributes. This is how you can access any attribute method
-described above.
+  described above.
 
-`.reset_attributes` 
+`.reset_attributes`
+
 - Example: `img.reset_attributes`
 - Removes all attributes.
 
-`.attributes=(new)` 
+`.attributes=(new)`
+
 - Example: `img.attributes = 'src="grumpy-baby.jpg" id="muddy"'`
 - Equivalent to `reset_attributes` and `.attributes << new`
 
@@ -241,40 +263,43 @@ described above.
 
 ### DoubleTag Properties:
 
-
 #### `DoubleTag` Inherits all of `SingleTag`'s properties and methods, and adds content and a
+
 closing tag.
 
- #### content
+#### content
 
-   - Array
-   - Optional
-   - Contains anything (but probably just strings and tags. Anything else will be turned into a
-     string with `.to_s`, which is an alias for `.inspect` most of the time).
-   - Each element in the array corresponds to at least one line of HTML
-   - Multiline child tags will get as many lines as they need (like you'd expect).
-   - Child elements are not rendered until the parent is rendered, meaning you can access and
-     modify them after defining a parent.
-   - add with `.add_content`, or modify the content array directly.
+- Array
+- Optional
+- Contains anything (but probably just strings and tags. Anything else will be turned into a
+  string with `.to_s`, which is an alias for `.inspect` most of the time).
+- Each element in the array corresponds to at least one line of HTML
+- Multiline child tags will get as many lines as they need (like you'd expect).
+- Child elements are not rendered until the parent is rendered, meaning you can access and
+  modify them after defining a parent.
+- add with `.add_content`, or modify the content array directly.
 
- #### oneline
-  - Boolean
-  - optional, defaults to false.
-  - When true, the entire element and its content will be rendered as a single line. Useful for
-    anchor tags and list items.
+#### oneline
+
+- Boolean
+- optional, defaults to false.
+- When true, the entire element and its content will be rendered as a single line. Useful for
+  anchor tags and list items.
 
 ### DoubleTag Methods (that you care about)
 
-For DoubleTag Examples, we're working with a div tag: 
+For DoubleTag Examples, we're working with a div tag:
 
 ```
 div = DoubleTag.new 'div'
 ```
 
-`DoubleTag.new(element, attributes: {}, oneline: false, content: [])` 
+`DoubleTag.new(element, attributes: {}, oneline: false, content: [])`
+
 - You can initialize it with content.
 
-`add_content(anything)` 
+`add_content(anything)`
+
 - Example: `div.add_content 'example text!'`
 - Example: `div.add_content ['splits', 'across', 'lines']`
 - Example: `div.add_content img # image tag from earlier`
@@ -300,77 +325,78 @@ tag.
 Convert it into an actual tag with `.add_parent(DoubleTag)`
 
 ## Configuration
- 
- Indentation is defined by the `indent` method on the DoubleTag class, which is two escaped
- spaces by default ("\ \ "). If you'd like to change it:
 
- 1. Make a new class, inherit from DoubleTag.
- 2. Override `indent` with whatever you want.
- 3. Use your new class instead of DoubleTag.
+Indentation is defined by the `indent` method on the DoubleTag class, which is two escaped
+spaces by default ("\ \ "). If you'd like to change it:
 
- Example:
+1.  Make a new class, inherit from DoubleTag.
+2.  Override `indent` with whatever you want.
+3.  Use your new class instead of DoubleTag.
 
- ```ruby
- 
- require 'objective_elements'
+Example:
 
- class MyDoubleTag < DoubleTag
-  def indent
-    # 4 escaped spaces:
-    "\ \ \ \ "
-  end
+```ruby
+
+require 'objective_elements'
+
+class MyDoubleTag < DoubleTag
+ def indent
+   # 4 escaped spaces:
+   "\ \ \ \ "
  end
+end
 
 MyDoubleTag.new('p', content: 'hello').to_s
 # <p>
 #     hello
 # </p>
 
- ```
+```
 
- ## Limitations
+## Limitations
 
-* It doesn't know a single HTML element on its own, so it does nothing to ensure your HTML is valid.
+- It doesn't know a single HTML element on its own, so it does nothing to ensure your HTML is valid.
 
-* A parent tag can't put siblings on the same line. You can either do this (with `oneline: true` on
-   the strong tag):
+- A parent tag can't put siblings on the same line. You can either do this (with `oneline: true` on
+  the strong tag):
 
-    ```html
+  ```html
+  <p>
+    Here is some
+    <strong>strong</strong>
+    text.
+  </p>
+  ```
 
-    <p>
-      Here is some
-      <strong>strong</strong>
-      text.
-    </p>
+  or this (default behavior):
 
-    ```
-    or this (default behavior):
+  ```html
+  <p>
+    Here is some
+    <strong>
+      strong
+    </strong>
+    text.
+  </p>
+  ```
 
-    ```html
+  But you can't do this without string interpolation or something:
 
-    <p>
-      Here is some
-      <strong>
-        strong
-      </strong>
-      text.
-    </p>
+  ```html
+  <p>
+    Here is some
+    <strong>strong</strong>
+    text.
+  </p>
+  ```
 
-    ```
-    But you can't do this without string interpolation or something:
+  This doesn't affect how the browser will render it, but it might bug you if you're particular about
+  source code layout.
 
-    ```html
-
-    <p>Here is some <strong>strong</strong> text.</p>
-
-    ```
-    This doesn't affect how the browser will render it, but it might bug you if you're particular about
-    source code layout.
-
-* If you set 'oneline: true' on a parent DoubleTag, but not all its children DoubleTags, the output
+- If you set 'oneline: true' on a parent DoubleTag, but not all its children DoubleTags, the output
   will not be pretty. I advise against it. Handling this situation is on the TODO list.
 
-* It doesn't wrap long lines of text, and it doesn't indent text with newlines embedded. It's on the
+- It doesn't wrap long lines of text, and it doesn't indent text with newlines embedded. It's on the
   TODO list.
 
 ## Contributing
