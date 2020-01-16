@@ -13,6 +13,10 @@ class HTMLAttributes
   def to_s
     return_string = ''
     @content.each_pair do |k, v|
+      # If an attribute has no values, we need to introduce an empty string to
+      # the array in order to get the correct format (alt="", for example):
+      v << '' if v.empty?
+
       return_string << "#{k}=\"#{v.join ' '}\" "
     end
 
