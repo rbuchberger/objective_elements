@@ -105,8 +105,9 @@ class HTMLAttributes
     new_hash = {}
     new_string.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
       # [['class','something something-else'],['id','my-id']]
-      key = m.shift
-      val = m.pop
+
+      key, val = *m
+
       if new_hash[key]
         new_hash[key] << ' ' + val
       else

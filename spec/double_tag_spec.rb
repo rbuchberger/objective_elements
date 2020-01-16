@@ -56,7 +56,14 @@ RSpec.describe DoubleTag do
 
     it 'returns array' do
       expect(@t.to_a).to eql(
-        ['<div>', "#{@i}<p>", "#{@i}</p>", "#{@i}<hr>", "#{@i}example text", '</div>']
+        [
+          '<div>',
+          "#{@i}<p>",
+          "#{@i}</p>",
+          "#{@i}<hr>",
+          "#{@i}example text",
+          '</div>'
+        ]
       )
     end
 
