@@ -1,0 +1,5 @@
+inherit_from: ../.rubocop.yml
+
+# We don't care about block or method length for our specs
+Metrics/BlockLength:
+  Enabled: false
