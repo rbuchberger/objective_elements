@@ -13,6 +13,10 @@ class HTMLAttributes
   def to_s
     return_string = ''
     @content.each_pair do |k, v|
+      # If an attribute has no values, we need to introduce an empty string to
+      # the array in order to get the correct format (alt="", for example):
+      v << '' if v.empty?
+
       return_string << "#{k}=\"#{v.join ' '}\" "
     end
 
@@ -86,27 +90,33 @@ class HTMLAttributes
     add_hash hashify_input new_string
   end
 
-  def add_hash(new)
+  # Input: Keys are attribute names (either strings or symbols), values are
+  # attribute values (either a string or an array of strings)
+  def add_hash(new_hash)
     formatted_new = {}
-    new.each_pair do |k, v|
-      v = v.split ' ' if v.is_a? String
+
+    new_hash.each_pair do |k, v|
+      v = v.split(' ') if v.is_a? String
+
       formatted_new[k.to_sym] = v
     end
 
-    @content.merge! formatted_new do |_key, oldval, newval|
-      oldval.concat newval
+    @content.merge!(formatted_new) do |_key, oldval, newval|
+      oldval.concat(newval)
     end
+
     self
   end
 
   def hashify_input(new_string)
     # looking for something like:
-    # 'class="something something-else" id="my-id"'
+    # 'class="something something-else" id="my-id" alt=""'
     new_hash = {}
-    new_string.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
-      # [['class','something something-else'],['id','my-id']]
+    new_string.scan(/ ?([^="]+)="([^"]*)"/).each do |match|
+      # Returns something like:
+      # [['class','something something-else'],['id','my-id'],['alt', '']]
 
-      key, val = *m
+      key, val = *match
 
       if new_hash[key]
         new_hash[key] << ' ' + val
