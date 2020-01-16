@@ -101,7 +101,9 @@ class HTMLAttributes
       formatted_new[k.to_sym] = v
     end
 
-    @content.merge!(formatted_new) { |_key, old, new| old.concat(new) }
+    @content.merge!(formatted_new) do |_key, oldval, newval|
+      oldval.concat(newval)
+    end
 
     self
   end
