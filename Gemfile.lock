@@ -77,8 +77,8 @@ DEPENDENCIES
   pry (~> 0.11.3)
   rake (~> 10.0)
   rspec (~> 3.8.0)
-  rubocop
-  solargraph
+  rubocop (~> 0.79)
+  solargraph (~> 0.38)
 
 BUNDLED WITH
    1.17.2
