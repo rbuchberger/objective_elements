@@ -82,5 +82,11 @@ RSpec.describe HTMLAttributes do
 
       expect(@t.to_s).to eql('')
     end
+
+    it 'handles empty attributes' do
+      @t << 'alt=""'
+
+      expect(@t.to_s).to eql('src="angry-baby.jpg" class="stumpy" alt=""')
+    end
   end
 end
