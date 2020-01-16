@@ -6,9 +6,9 @@ Gem::Specification.new do |spec|
   spec.name          = 'objective_elements'
   spec.version       = ObjectiveElements::VERSION
   spec.authors       = ['Robert Buchberger']
-  spec.email         = ['robert@robert-buchberger.com']
+  spec.email         = ['robert@buchberger.cc']
 
-  spec.summary       = 'Build HTML without interpolating strings.'
+  spec.summary       = 'Build HTML with simple ruby.'
   spec.homepage      = 'https://github.com/rbuchberger/objective_elements'
   spec.license       = 'MIT'
 
@@ -28,6 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry', '~>0.11.3'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~>3.8.0'
-  spec.add_development_dependency 'rubocop'
-  spec.add_development_dependency 'solargraph'
+  spec.add_development_dependency 'rubocop', '~>0.79'
+  spec.add_development_dependency 'solargraph', '~>0.38'
 end
