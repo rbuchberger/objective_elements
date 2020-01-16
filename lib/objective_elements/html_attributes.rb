@@ -103,7 +103,7 @@ class HTMLAttributes
     # looking for something like:
     # 'class="something something-else" id="my-id"'
     new_hash = {}
-    new_string.scan(/ ?([^="]+)="([^"]+)"/).each do |m|
+    new_string.scan(/ ?([^="]+)="([^"]*)"/).each do |m|
       # [['class','something something-else'],['id','my-id']]
 
       key, val = *m
