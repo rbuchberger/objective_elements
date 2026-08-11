@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'objective_elements'
 RSpec.describe DoubleTag do
   context 'no content' do
@@ -46,7 +48,7 @@ RSpec.describe DoubleTag do
       @t = DoubleTag.new 'div', content: @content
 
       # Indentation, for convenience:
-      @i = "\ \ "
+      @i = '  '
     end
     it 'returns string' do
       expect(@t.to_s).to eql(
@@ -95,8 +97,8 @@ RSpec.describe DoubleTag do
       q = @t.add_parent DoubleTag.new 'main'
 
       expect(q.to_s).to eql(
-        "<main>\n#{@i}<div>\n#{@i * 2}<p>\n#{@i * 2}"\
-        "</p>\n#{@i * 2}<hr>\n#{@i * 2}example text\n"\
+        "<main>\n#{@i}<div>\n#{@i * 2}<p>\n#{@i * 2}" \
+        "</p>\n#{@i * 2}<hr>\n#{@i * 2}example text\n" \
         "#{@i}</div>\n</main>\n"
       )
     end

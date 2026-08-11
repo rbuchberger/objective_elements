@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Author: Robert Buchberger <robert@buchberger.cc>
 #
 # This module provides a few helpful classes for generating HTML using simple

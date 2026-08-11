@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 # Represents standard HTML attributes, such as class="myclass"
 class HTMLAttributes
   attr_reader :content
+
   def initialize(new = nil)
     @content = {}
     self << new
@@ -11,16 +14,9 @@ class HTMLAttributes
   end
 
   def to_s
-    return_string = ''
-    @content.each_pair do |k, v|
-      # If an attribute has no values, we need to introduce an empty string to
-      # the array in order to get the correct format (alt="", for example):
-      v << '' if v.empty?
-
-      return_string << "#{k}=\"#{v.join ' '}\" "
-    end
-
-    return_string.strip
+    # An attribute with no values joins to an empty string, which is the
+    # correct format (alt="", for example).
+    @content.map { |k, v| "#{k}=\"#{v.join ' '}\"" }.join(' ')
   end
 
   # This is the only way we add new attributes. Flexible about what you give
@@ -96,7 +92,7 @@ class HTMLAttributes
     formatted_new = {}
 
     new_hash.each_pair do |k, v|
-      v = v.split(' ') if v.is_a? String
+      v = v.split if v.is_a? String
 
       formatted_new[k.to_sym] = v
     end
@@ -119,7 +115,7 @@ class HTMLAttributes
       key, val = *match
 
       if new_hash[key]
-        new_hash[key] << ' ' + val
+        new_hash[key] << " #{val}"
       else
         new_hash[key] = val
       end

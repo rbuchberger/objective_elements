@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'objective_elements'
 RSpec.describe ShelfTag do
   before(:each) do
