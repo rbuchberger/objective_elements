@@ -99,25 +99,14 @@ div = p.add_parent DoubleTag.new 'div'
 
 ## Changes
 
-### 1.1.1
-
-Fix bug where duplicate attribute keys would overwrite each other's values, when passed at the same time.
-
-### 1.1.0
-
-Add `ShelfTag`, which is useful when you want to create siblings without a parent element.
-
-### 1.0.0
-
-Attributes syntax has changed pretty significantly. Find `.add_attributes` & replace `.attributes <<`
-will get you most of the way there, but you should read over the usage section again.
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Installation
 
 ```ruby
 # Gemfile
 
-gem 'objective_elements', '~> 1.0.0'
+gem 'objective_elements', '~> 2.0'
 ```
 
 ```ruby
@@ -125,6 +114,13 @@ gem 'objective_elements', '~> 1.0.0'
 
 require 'objective_elements'
 ```
+
+### Supported Rubies
+
+Ruby 3.0 and up, with no upper bound. The policy is to support every non-EOL Ruby, plus EOL versions
+still shipped in a supported Ubuntu LTS — which is the only reason the floor is as low as 3.0. It
+rises to 3.2 when Ubuntu 22.04 leaves standard support in April 2027. See
+[ADR 0001](docs/adr/0001-ruby-version-support-policy.md).
 
 ## Terminology
 
@@ -399,19 +395,17 @@ MyDoubleTag.new('p', content: 'hello').to_s
 - It doesn't wrap long lines of text, and it doesn't indent text with newlines embedded. It's on the
   TODO list.
 
-## Contributing
+## Development
 
-For code style, I've been using rubocop with the default settings and would appreciate if you did the
-same.
+Ruby is managed with [mise](https://mise.jdx.dev/); `mise.toml` pins 3.4, which is the version CI
+lints on, so local rubocop can't disagree with CI. Any supported Ruby will run the tests.
 
-If you add new functionality, or change existing functionality, please update the rspec tests to
-reflect it.
-
-https://github.com/rbuchberger/objective_elements
-
-contact:
-robert@robert-buchberger.com
-
+```sh
+mise install     # optional; only if you use mise
+bundle install
+bundle exec rake # rspec + rubocop
+```
+[Scoped commits](https://scopedcommits.com/)
 
 ## AI Policy
 
