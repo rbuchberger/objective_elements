@@ -412,6 +412,21 @@ https://github.com/rbuchberger/objective_elements
 contact:
 robert@robert-buchberger.com
 
+
+## AI Policy
+
+The use of LLM powered coding tools is permitted so long as:
+
+* Any commits with any AI generated code have a trailer: `Assisted-by: <model>`
+* All changes are read completely and reviewed thoroughly by a knowledgable human before merging to
+  master. This has always been the case, but it is especially true for AI-generated code.
+* Pull request authors are expected to have done the same before submitting.
+
+If you don't want to run AI generated code, you can use versions prior to `2.0.0`. You are likely
+using this project as a dependency of jekyll_picture_tag; it is pinned to OE `1.x` for JPT versions
+prior to `3.0.0` which carries a similar policy change. In other words, If you use the non-ai
+version of JPT, you'll get the non-ai version of this.
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
