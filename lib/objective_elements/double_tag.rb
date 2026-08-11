@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Non-Self-Closing tag. Can have content, but doesn't have to.
 class DoubleTag < SingleTag
   attr_accessor :oneline
@@ -29,23 +31,23 @@ class DoubleTag < SingleTag
 
   def to_a
     lines = content.map { |c| build_content_line c }
-    lines = lines.flatten.map { |l| l.prepend oneline ? '' : indent }
+    lines = lines.flatten.map { |l| oneline ? l : indent + l }
     lines.unshift(opening_tag).push(closing_tag)
   end
 
   def to_s
-    to_a.join(oneline ? '' : "\n") + "\n"
+    "#{to_a.join(oneline ? '' : "\n")}\n"
   end
 
   private
 
   def build_content_line(element)
     # Since DoubleTag inherits from SingleTag, it will slurp up those too.
-    element.is_a?(SingleTag) ? element.to_a : element.to_s.dup
+    element.is_a?(SingleTag) ? element.to_a : element.to_s
   end
 
   def indent
-    "\ \ "
+    '  '
   end
 
   def closing_tag

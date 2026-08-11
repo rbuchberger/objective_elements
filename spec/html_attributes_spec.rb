@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'objective_elements'
 RSpec.describe HTMLAttributes do
   context 'single attribute' do
@@ -85,6 +87,13 @@ RSpec.describe HTMLAttributes do
 
     it 'handles empty attributes' do
       @t << 'alt=""'
+
+      expect(@t.to_s).to eql('src="angry-baby.jpg" class="stumpy" alt=""')
+    end
+
+    it 'renders empty attributes identically when called repeatedly' do
+      @t << 'alt=""'
+      @t.to_s
 
       expect(@t.to_s).to eql('src="angry-baby.jpg" class="stumpy" alt=""')
     end

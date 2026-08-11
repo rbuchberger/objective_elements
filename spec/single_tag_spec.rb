@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'objective_elements'
 RSpec.describe SingleTag do
   context 'simple tag' do
@@ -57,7 +59,7 @@ RSpec.describe SingleTag do
       @t.attributes << { class: 'wiley mopey', id: 'frumpy' }
 
       expect(@t.to_s).to eql(
-        '<img src="angry-baby.jpg" '\
+        '<img src="angry-baby.jpg" ' \
         "class=\"stumpy wiley mopey\" id=\"frumpy\">\n"
       )
     end

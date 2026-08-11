@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Collection of HTML element tags
 # Describes a basic, self-closing HTML tag.
 class SingleTag
@@ -34,7 +36,7 @@ class SingleTag
 
   # Renders our HTML.
   def to_s
-    opening_tag + "\n"
+    "#{opening_tag}\n"
   end
 
   # Allows us to work with attributes as methods:
@@ -53,8 +55,8 @@ class SingleTag
   private
 
   def opening_tag
-    output =  '<' + @element
-    output << ' ' + @attributes.to_s unless @attributes.empty?
-    output << '>'
+    return "<#{@element}>" if @attributes.empty?
+
+    "<#{@element} #{@attributes}>"
   end
 end
