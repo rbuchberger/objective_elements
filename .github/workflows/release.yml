@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  # Publishes whatever version.rb says on the selected branch. Needed for
+  # v2.0.0, whose tag predates this workflow. `rake release` skips tagging when
+  # the tag already exists, so this is safe to re-run.
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: push to rubygems
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      # Required for the OIDC token rubygems.org trades for a scoped API key.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          # Matches the version mise.toml pins.
+          ruby-version: "3.4"
+          bundler-cache: true
+      - uses: rubygems/release-gem@v1
